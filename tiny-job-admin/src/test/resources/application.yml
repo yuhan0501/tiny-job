@@ -1,0 +1,26 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /tiny-job
+spring:
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    #dev
+    password: 123456
+    url: jdbc:mysql://127.0.0.1:3306/tiny-job?useUnicode=true&characterEncoding=utf-8
+    username: root
+    hikari:
+      idleTimeout: 300000
+      maxLifetime: 600000
+      maximumPoolSize: 100
+      minimumIdle: 2
+      validationTimeout: 300000
+      connectionTimeout: 60000
+      connectionTestQuery: select 1
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+tiny-job:
+  triggerPollSize: 100
+  log:
+    level: debug
