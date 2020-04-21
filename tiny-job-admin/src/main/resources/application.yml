@@ -3,6 +3,11 @@ server:
   servlet:
     context-path: /tiny-job
 spring:
+  resources:
+    static-locations: classpath:static/
+  thymeleaf:
+    mode: HTML5
+    cache: false
   cloud:
     zookeeper:
       connect-string: 127.0.0.1:2181
@@ -19,6 +24,7 @@ spring:
       validationTimeout: 300000
       connectionTimeout: 60000
       connectionTestQuery: select 1
+
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
