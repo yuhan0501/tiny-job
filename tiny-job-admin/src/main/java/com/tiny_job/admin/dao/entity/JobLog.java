@@ -1,25 +1,34 @@
 package com.tiny_job.admin.dao.entity;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.sql.Timestamp;
+import java.util.Date;
+
 /**
  * @description:
  * @author: yuhan
  * @create: 2020-04-16 11:29
  **/
-
+@Entity
+@Table(name = "job_log")
 public class JobLog {
-
+    @Id
+    @GeneratedValue(generator = "JDBC")
     private Long id;
     private Long jobId;
     private String executeService;
-    private String executePath;
+    private String executeMethod;
     private String executeParam;
+    private String serviceType;
     private Long executeTimeout;
-    private Long executorFailRetryCount;
-    private java.util.Date triggerTime;
-    private java.util.Date handleTime;
-    private Long handleCode;
+    private Long executeFailRetryCount;
+    private Timestamp triggerTime;
+    private Timestamp handleTime;
+    private String handleCode;
     private String handleMsg;
-
 
     public Long getId() {
         return id;
@@ -29,7 +38,6 @@ public class JobLog {
         this.id = id;
     }
 
-
     public Long getJobId() {
         return jobId;
     }
@@ -37,7 +45,6 @@ public class JobLog {
     public void setJobId(Long jobId) {
         this.jobId = jobId;
     }
-
 
     public String getExecuteService() {
         return executeService;
@@ -47,15 +54,13 @@ public class JobLog {
         this.executeService = executeService;
     }
 
-
-    public String getExecutePath() {
-        return executePath;
+    public String getExecuteMethod() {
+        return executeMethod;
     }
 
-    public void setExecutePath(String executePath) {
-        this.executePath = executePath;
+    public void setExecuteMethod(String executeMethod) {
+        this.executeMethod = executeMethod;
     }
-
 
     public String getExecuteParam() {
         return executeParam;
@@ -65,6 +70,13 @@ public class JobLog {
         this.executeParam = executeParam;
     }
 
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
 
     public Long getExecuteTimeout() {
         return executeTimeout;
@@ -74,42 +86,37 @@ public class JobLog {
         this.executeTimeout = executeTimeout;
     }
 
-
-    public Long getExecutorFailRetryCount() {
-        return executorFailRetryCount;
+    public Long getExecuteFailRetryCount() {
+        return executeFailRetryCount;
     }
 
-    public void setExecutorFailRetryCount(Long executorFailRetryCount) {
-        this.executorFailRetryCount = executorFailRetryCount;
+    public void setExecuteFailRetryCount(Long executeFailRetryCount) {
+        this.executeFailRetryCount = executeFailRetryCount;
     }
 
-
-    public java.util.Date getTriggerTime() {
+    public Date getTriggerTime() {
         return triggerTime;
     }
 
-    public void setTriggerTime(java.util.Date triggerTime) {
+    public void setTriggerTime(Timestamp triggerTime) {
         this.triggerTime = triggerTime;
     }
 
-
-    public java.util.Date getHandleTime() {
+    public Date getHandleTime() {
         return handleTime;
     }
 
-    public void setHandleTime(java.util.Date handleTime) {
+    public void setHandleTime(Timestamp handleTime) {
         this.handleTime = handleTime;
     }
 
-
-    public Long getHandleCode() {
+    public String getHandleCode() {
         return handleCode;
     }
 
-    public void setHandleCode(Long handleCode) {
+    public void setHandleCode(String handleCode) {
         this.handleCode = handleCode;
     }
-
 
     public String getHandleMsg() {
         return handleMsg;
@@ -125,10 +132,11 @@ public class JobLog {
                 "id=" + id +
                 ", jobId=" + jobId +
                 ", executeService='" + executeService + '\'' +
-                ", executePath='" + executePath + '\'' +
+                ", executeMethod='" + executeMethod + '\'' +
                 ", executeParam='" + executeParam + '\'' +
+                ", serviceType='" + serviceType + '\'' +
                 ", executeTimeout=" + executeTimeout +
-                ", executorFailRetryCount=" + executorFailRetryCount +
+                ", executorFailRetryCount=" + executeFailRetryCount +
                 ", triggerTime=" + triggerTime +
                 ", handleTime=" + handleTime +
                 ", handleCode=" + handleCode +
