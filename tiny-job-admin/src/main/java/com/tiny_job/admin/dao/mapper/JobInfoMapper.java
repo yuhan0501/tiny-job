@@ -1,7 +1,6 @@
 package com.tiny_job.admin.dao.mapper;
 
 import com.tiny_job.admin.dao.entity.JobInfo;
-import com.tiny_job.admin.dao.entity.JobSpringCloudConfig;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -20,6 +19,5 @@ public interface JobInfoMapper extends tk.mybatis.mapper.common.Mapper<JobInfo>,
             "limit #{size}")
     List<JobInfo> scheduleJobQuery(@Param("triggerTime") Long triggerTime, @Param("size") int size);
 
-    @Select("select * from job_spring_cloud_config where id = #{id}")
-    JobSpringCloudConfig selectById(@Param("id") Long id);
+
 }

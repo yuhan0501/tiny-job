@@ -1,9 +1,8 @@
 package com.tiny_job.admin.executor;
 
-import com.tiny_job.admin.dao.SpringCloudJobConfigDao;
+import com.tiny_job.admin.dao.entity.JobConfig;
 import com.tiny_job.admin.dao.entity.JobInfo;
-import com.tiny_job.admin.dao.entity.JobSpringCloudConfig;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.tiny_job.admin.dao.mapper.JobConfigMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,19 +25,18 @@ public class TinyJobSpringCloudAdapter implements TinyJobExecutorBaseAdapter {
     private static Logger logger = LoggerFactory.getLogger(TinyJobSpringCloudAdapter.class);
 
     @Resource
-    private SpringCloudJobConfigDao cloudJobConfigDao;
+    private JobConfigMapper jobConfigMapper;
     @Autowired
     private RestTemplate restTemplate;
 
     @Override
     public void processJob(JobInfo jobInfo) {
-        jobInfo.setJobConfig(cloudJobConfigDao.findByJobId(jobInfo.getId()));
-        JobSpringCloudConfig springCloudConfig = (JobSpringCloudConfig) jobInfo.getJobConfig();
-        ObjectMapper objectMapper = new ObjectMapper();
+        jobInfo.setJobConfig(jobConfigMapper.selectByPrimaryKey(jobInfo.getConfigId()));
+        JobConfig jobConfig = jobInfo.getJobConfig();
         RequestEntity request = RequestEntity
-                .post(UriComponentsBuilder.fromUriString("http://" + springCloudConfig.getExecuteService() + springCloudConfig.getExecutePath()).build().toUri())
+                .post(UriComponentsBuilder.fromUriString("http://" + jobConfig.getExecuteService() + jobConfig.getExecuteMethod()).build().toUri())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(springCloudConfig.getExecuteParam());
+                .body(jobConfig.getExecuteParam());
         ResponseEntity<String> reslult = restTemplate.exchange(request, String.class);
         logger.info(reslult.getBody());
     }
