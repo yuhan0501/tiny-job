@@ -5,7 +5,6 @@ import com.tiny_job.admin.core.thread.JobTriggerPoolHelper;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -31,7 +30,6 @@ public class TinyJobConfig implements InitializingBean {
 
 
     @Bean
-    @LoadBalanced
     //客户端负载均衡
     public RestTemplate restTemplate() {
         return new RestTemplate();

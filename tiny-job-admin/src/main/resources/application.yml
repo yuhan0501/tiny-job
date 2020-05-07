@@ -8,14 +8,14 @@ spring:
   thymeleaf:
     mode: HTML5
     cache: false
-  cloud:
-    zookeeper:
-      connect-string: 127.0.0.1:2181
+  #  cloud:
+  #    zookeeper:
+  #      connect-string: 127.0.0.1:2181
   datasource:
     driverClassName: com.mysql.jdbc.Driver
-    password: 123456
-    url: jdbc:mysql://127.0.0.1:3306/tiny-job?useUnicode=true&characterEncoding=utf-8
-    username: root
+    password: "%28Sawrqy}FM"
+    url: jdbc:mysql://rm-wz9hs2yy95dgy9723oo.mysql.rds.aliyuncs.com:3306/tiny-job?useUnicode=true&characterEncoding=utf-8
+    username: tiny-job
     hikari:
       idleTimeout: 300000
       maxLifetime: 600000

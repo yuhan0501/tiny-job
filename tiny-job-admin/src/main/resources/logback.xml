@@ -36,7 +36,7 @@
 
 
     <root>
-        <level value="DEBUG"/>
+        <level value="INFO"/>
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
