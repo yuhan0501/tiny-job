@@ -113,6 +113,7 @@
     "add-locale": "lingui add-locale",
     "extract": "lingui extract",
     "trans": "lingui extract --clean && node ./scripts/translate.js",
-    "doc": "docsify serve docs"
+    "doc": "docsify serve docs",
+    "copy":"xcopy dist\\*.* .\\..\\tiny-job-admin\\src\\main\\resources\\templates /s/y"
   }
 }

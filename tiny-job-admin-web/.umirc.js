@@ -3,7 +3,8 @@ import { resolve } from 'path'
 import { i18n } from './src/utils/config'
 
 export default {
-  publicPath: 'http://localhost:8080/',
+  base: '/tiny-job/',
+  publicPath: 'http://localhost:8080/tiny-job/',
   hash: true,
   ignoreMomentLocale: true,
   targets: { ie: 9 },
@@ -101,7 +102,7 @@ export default {
       'lodash',
     ],
   ],
-  chainWebpack: function(config, { webpack }) {
+  chainWebpack: function (config, { webpack }) {
     config.merge({
       optimization: {
         minimize: true,
