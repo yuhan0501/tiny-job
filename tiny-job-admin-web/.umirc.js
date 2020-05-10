@@ -3,7 +3,7 @@ import { resolve } from 'path'
 import { i18n } from './src/utils/config'
 
 export default {
-  publicPath: 'https://cdn.antd-admin.zuiidea.com/',
+  publicPath: 'http://localhost:8080/',
   hash: true,
   ignoreMomentLocale: true,
   targets: { ie: 9 },
