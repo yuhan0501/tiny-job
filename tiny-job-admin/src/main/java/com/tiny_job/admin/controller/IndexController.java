@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author: yuhan
  * @create: 2020-04-20 08:49
  **/
-@Controller
+//@Controller
 public class IndexController {
 
     @RequestMapping({"", "index.html"})
