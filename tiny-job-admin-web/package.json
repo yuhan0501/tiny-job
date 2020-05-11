@@ -114,6 +114,6 @@
     "extract": "lingui extract",
     "trans": "lingui extract --clean && node ./scripts/translate.js",
     "doc": "docsify serve docs",
-    "copy":"xcopy dist\\*.* .\\..\\tiny-job-admin\\src\\main\\resources\\templates /s/y"
+    "copy":"xcopy dist\\*.* .\\..\\tiny-job-admin\\src\\main\\resources\\static /s/y"
   }
 }
