@@ -68,6 +68,6 @@
     "eslint": "eslint --ext .js,.jsx src",
     "stylelint": "stylelint \"src/**/*.css\"",
     "lesshint": "lesshint src/",
-    "copy":"xcopy dist\\*.* .\\..\\tiny-job-admin\\src\\main\\resources\\static /s/y"
+    "copy": "xcopy dist\\*.* .\\..\\tiny-job-admin\\src\\main\\resources\\static /s/y"
   }
 }
