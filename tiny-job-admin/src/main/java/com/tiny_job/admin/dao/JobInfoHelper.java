@@ -7,6 +7,8 @@ import com.tiny_job.admin.exception.TinyJobExceptionAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -51,6 +53,13 @@ public class JobInfoHelper {
     public List<JobInfo> scheduleJobQuery(Long scheduleTime, int preSize) {
 
         return jobInfoMapper.scheduleJobQuery(scheduleTime, preSize);
+    }
+
+    public List<JobInfo> jobInfoList(Integer jobStatus,String jobDesc){
+        JobInfo jobInfo = new JobInfo();
+        jobInfo.setJobStatus(jobStatus);
+        jobInfo.setJobDesc(jobDesc);
+        return jobInfoMapper.select(jobInfo);
     }
 
     /**
