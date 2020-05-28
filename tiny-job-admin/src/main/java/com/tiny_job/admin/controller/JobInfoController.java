@@ -1,5 +1,7 @@
 package com.tiny_job.admin.controller;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.tiny_job.admin.controller.model.CommonResult;
 import com.tiny_job.admin.dao.JobInfoHelper;
 import com.tiny_job.admin.dao.entity.JobInfo;
@@ -8,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
@@ -33,9 +36,15 @@ public class JobInfoController {
 
     @RequestMapping("/list")
     @ResponseBody
-    public CommonResult<List<JobInfo>> list() {
+    public CommonResult<List<JobInfo>> list(@RequestParam(required = false,defaultValue = "0")int currentPage,
+                                            @RequestParam(required = false,defaultValue = "0")int pageSize,
+                                            Integer jobStatus,String jobDesc) {
         CommonResult<List<JobInfo>> commonResult = new CommonResult<>();
-        commonResult.setData(jobInfoHelper.scheduleJobQuery(2587356846000L, 10));
+        Page page = PageHelper.startPage(currentPage,pageSize);
+        commonResult.setData(jobInfoHelper.jobInfoList(jobStatus,jobDesc));
+        commonResult.setCurrentPage(page.getPageNum());
+        commonResult.setPageSize(page.getPageSize());
+        commonResult.setTotalRecord(page.getTotal());
         return commonResult;
     }
 
