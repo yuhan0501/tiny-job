@@ -1,274 +1,96 @@
-import { cloneDeep, isString, flow, curry } from 'lodash'
-import umiRouter from 'umi/router'
-import pathToRegexp from 'path-to-regexp'
-import { i18n } from './config'
-import moment from 'moment'
-import 'moment/locale/zh-cn'
+// 一些辅助用的工具方法
+// 很多都是gross hack, 属于历史遗留问题
 
-export classnames from 'classnames'
-export config from './config'
-export request from './request'
-export { Color } from './theme'
+// antd从2.x开始引入了moment: http://momentjs.com/docs/
+// 这是个好东西, 处理日期方便多了, 简直就是javascript界的joda-time
+// 这些prototype的hack基本用不到了
+// 不过它format时的pattern和常见的不太一样, 比如要大写的YYYY才代表年份
 
-// export const { defaultLanguage } = i18n
-// export const languages = i18n.languages.map(item => item.key)
-export const languages = i18n ? i18n.languages.map(item => item.key) : []
-export const defaultLanguage = i18n ? i18n.defaultLanguage : ''
-
-/**
- * Query objects that specify keys and values in an array where all values are objects.
- * @param   {array}         array   An array where all values are objects, like [{key:1},{key:2}].
- * @param   {string}        key     The key of the object that needs to be queried.
- * @param   {string}        value   The value of the object that needs to be queried.
- * @return  {object|undefined}   Return frist object when query success.
+/** 对Date的扩展，将 Date 转化为指定格式的String * 月(M)、日(d)、12小时(h)、24小时(H)、分(m)、秒(s)、周(E)、季度(q)
+ * 可以用 1-2 个占位符 * 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
+ * eg:
+ * (new Date()).pattern("yyyy-MM-dd hh:mm:ss.S")==> 2006-07-02 08:09:04.423
+ * (new Date()).pattern("yyyy-MM-dd E HH:mm:ss") ==> 2009-03-10 二 20:09:04
+ * (new Date()).pattern("yyyy-MM-dd EE hh:mm:ss") ==> 2009-03-10 周二 08:09:04
+ * (new Date()).pattern("yyyy-MM-dd EEE hh:mm:ss") ==> 2009-03-10 星期二 08:09:04
+ * (new Date()).pattern("yyyy-M-d h:m:s.S") ==> 2006-7-2 8:9:4.18
  */
-export function queryArray(array, key, value) {
-  if (!Array.isArray(array)) {
-    return
+Date.prototype.format = function (fmt) {
+  var o = {
+    "M+": this.getMonth() + 1, //月份
+    "d+": this.getDate(), //日
+    "h+": this.getHours() % 12 == 0 ? 12 : this.getHours() % 12, //小时
+    "H+": this.getHours(), //小时
+    "m+": this.getMinutes(), //分
+    "s+": this.getSeconds(), //秒
+    "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+    "S": this.getMilliseconds() //毫秒
+  };
+  var week = {
+    "0": "/u65e5",
+    "1": "/u4e00",
+    "2": "/u4e8c",
+    "3": "/u4e09",
+    "4": "/u56db",
+    "5": "/u4e94",
+    "6": "/u516d"
+  };
+  if (/(y+)/.test(fmt)) {
+    fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
   }
-  return array.find(_ => _[key] === value)
-}
-
-/**
- * Convert an array to a tree-structured array.
- * @param   {array}     array     The Array need to Converted.
- * @param   {string}    id        The alias of the unique ID of the object in the array.
- * @param   {string}    parentId       The alias of the parent ID of the object in the array.
- * @param   {string}    children  The alias of children of the object in the array.
- * @return  {array}    Return a tree-structured array.
- */
-export function arrayToTree(
-  array,
-  id = 'id',
-  parentId = 'pid',
-  children = 'children'
-) {
-  const result = []
-  const hash = {}
-  const data = cloneDeep(array)
-
-  data.forEach((item, index) => {
-    hash[data[index][id]] = data[index]
-  })
-
-  data.forEach(item => {
-    const hashParent = hash[item[parentId]]
-    if (hashParent) {
-      !hashParent[children] && (hashParent[children] = [])
-      hashParent[children].push(item)
-    } else {
-      result.push(item)
-    }
-  })
-  return result
-}
-
-// export const langFromPath = curry(
-//   /**
-//    * Query language from pathname.
-//    * @param   {array}     languages         Specify which languages are currently available.
-//    * @param   {string}    defaultLanguage   Specify the default language.
-//    * @param   {string}    pathname          Pathname to be queried.
-//    * @return  {string}    Return the queryed language.
-//    */
-//   (languages, defaultLanguage, pathname) => {
-//     for (const item of languages) {
-//       if (pathname.startsWith(`/${item}/`)) {
-//         return item
-//       }
-//     }
-//     return defaultLanguage
-//   }
-// )(languages)(defaultLanguage)
-
-export const langFromPath = pathname => {
-  for (const item of languages) {
-    if (pathname.startsWith(`/${item}/`)) {
-      return item
+  if (/(E+)/.test(fmt)) {
+    fmt = fmt.replace(RegExp.$1, ((RegExp.$1.length > 1) ? (RegExp.$1.length > 2 ? "/u661f/u671f" : "/u5468") : "") + week[this.getDay() + ""]);
+  }
+  for (var k in o) {
+    if (new RegExp("(" + k + ")").test(fmt)) {
+      fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
     }
   }
-  return defaultLanguage
-}
+  return fmt;
+};
 
-export const deLangPrefix = curry(
-  /**
-   * Remove the language prefix in pathname.
-   * @param   {array}     languages  Specify which languages are currently available.
-   * @param   {string}    pathname   Remove the language prefix in the pathname.
-   * @return  {string}    Return the pathname after removing the language prefix.
-   */
-  (languages, pathname) => {
-    if (!pathname) {
-      return
+/**
+ * 在当前日期的基础上再增加几天
+ *
+ * @param num 要增加的天数
+ */
+Date.prototype.plusDays = function (num) {
+  var tmp = new Date();
+  tmp.setDate(this.getDate() + num);
+  return tmp;
+};
+
+// 为了克服js的一些坑...
+const Utils = {
+  isString(s) {
+    return typeof(s) === 'string' || s instanceof String;
+  },
+  // 获取url中的所有参数
+  getAllQueryParams() {
+    let str = window.location.href;
+    if (!str) {
+      return {};
     }
-    for (const item of languages) {
-      if (pathname.startsWith(`/${item}/`)) {
-        return pathname.replace(`/${item}/`, '/')
+
+    let num = str.indexOf('?');
+    str = str.substr(num + 1); //取得所有参数
+
+    const res = {};
+    let name;
+    let value;
+
+    const arr = str.split('&'); //各个参数放到数组里
+    for (let i = 0; i < arr.length; i++) {
+      num = arr[i].indexOf('=');
+      if (num > 0) {
+        name = arr[i].substring(0, num).trim();
+        value = arr[i].substr(num + 1).trim();
+        res[name] = value;
       }
     }
 
-    return pathname
-  }
-)(languages)
+    return res;
+  },
+};
 
-/**
- * Add the language prefix in pathname.
- * @param   {string}    pathname   Add the language prefix in the pathname.
- * @return  {string}    Return the pathname after adding the language prefix.
- */
-export function addLangPrefix(pathname) {
-  if (!i18n) {
-    return pathname
-  }
-
-  const prefix = langFromPath(window.location.pathname)
-  return `/${prefix}${deLangPrefix(pathname)}`
-}
-
-const routerAddLangPrefix = params => {
-  if (!i18n) {
-    return params
-  }
-  if (isString(params)) {
-    params = addLangPrefix(params)
-  } else {
-    params.pathname = addLangPrefix(params.pathname)
-  }
-  return params
-}
-
-/**
- * Adjust the router to automatically add the current language prefix before the pathname in push and replace.
- */
-const myRouter = { ...umiRouter }
-
-myRouter.push = flow(
-  routerAddLangPrefix,
-  umiRouter.push
-)
-
-myRouter.replace = flow(
-  routerAddLangPrefix,
-  myRouter.replace
-)
-
-export const router = myRouter
-
-/**
- * Whether the path matches the regexp if the language prefix is ignored, https://github.com/pillarjs/path-to-regexp.
- * @param   {string|regexp|array}     regexp     Specify a string, array of strings, or a regular expression.
- * @param   {string}                  pathname   Specify the pathname to match.
- * @return  {array|null}              Return the result of the match or null.
- */
-export function pathMatchRegexp(regexp, pathname) {
-  return pathToRegexp(regexp).exec(deLangPrefix(pathname))
-}
-
-/**
- * In an array object, traverse all parent IDs based on the value of an object.
- * @param   {array}     array     The Array need to Converted.
- * @param   {string}    current   Specify the value of the object that needs to be queried.
- * @param   {string}    parentId  The alias of the parent ID of the object in the array.
- * @param   {string}    id        The alias of the unique ID of the object in the array.
- * @return  {array}    Return a key array.
- */
-export function queryPathKeys(array, current, parentId, id = 'id') {
-  const result = [current]
-  const hashMap = new Map()
-  array.forEach(item => hashMap.set(item[id], item))
-
-  const getPath = current => {
-    const currentParentId = hashMap.get(current)[parentId]
-    if (currentParentId) {
-      result.push(currentParentId)
-      getPath(currentParentId)
-    }
-  }
-
-  getPath(current)
-  return result
-}
-
-/**
- * In an array of objects, specify an object that traverses the objects whose parent ID matches.
- * @param   {array}     array     The Array need to Converted.
- * @param   {string}    current   Specify the object that needs to be queried.
- * @param   {string}    parentId  The alias of the parent ID of the object in the array.
- * @param   {string}    id        The alias of the unique ID of the object in the array.
- * @return  {array}    Return a key array.
- */
-export function queryAncestors(array, current, parentId, id = 'id') {
-  const result = [current]
-  const hashMap = new Map()
-  array.forEach(item => hashMap.set(item[id], item))
-
-  const getPath = current => {
-    const currentParentId = hashMap.get(current[id])[parentId]
-    if (currentParentId) {
-      result.push(hashMap.get(currentParentId))
-      getPath(hashMap.get(currentParentId))
-    }
-  }
-
-  getPath(current)
-  return result
-}
-
-/**
- * Query which layout should be used for the current path based on the configuration.
- * @param   {layouts}     layouts   Layout configuration.
- * @param   {pathname}    pathname  Path name to be queried.
- * @return  {string}   Return frist object when query success.
- */
-export function queryLayout(layouts, pathname) {
-  let result = 'public'
-
-  const isMatch = regepx => {
-    return regepx instanceof RegExp
-      ? regepx.test(pathname)
-      : pathMatchRegexp(regepx, pathname)
-  }
-
-  for (const item of layouts) {
-    let include = false
-    let exclude = false
-    if (item.include) {
-      for (const regepx of item.include) {
-        if (isMatch(regepx)) {
-          include = true
-          break
-        }
-      }
-    }
-
-    if (include && item.exclude) {
-      for (const regepx of item.exclude) {
-        if (isMatch(regepx)) {
-          exclude = true
-          break
-        }
-      }
-    }
-
-    if (include && !exclude) {
-      result = item.name
-      break
-    }
-  }
-
-  return result
-}
-
-export function getLocale() {
-  return langFromPath(window.location.pathname)
-}
-
-export function setLocale(language) {
-  if (getLocale() !== language) {
-    moment.locale(language === 'zh' ? 'zh-cn' : language)
-    umiRouter.push({
-      pathname: `/${language}${deLangPrefix(window.location.pathname)}`,
-      search: window.location.search,
-    })
-  }
-}
+export default Utils;
