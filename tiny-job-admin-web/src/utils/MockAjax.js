@@ -1,5 +1,5 @@
 import Logger from './Logger';
-import {ACTION_KEY} from '../components/DBTable/InnerTableRenderUtils';
+import { ACTION_KEY } from '../components/DBTable/InnerTableRenderUtils';
 
 const logger = new Logger('mockAjax');
 
@@ -216,7 +216,6 @@ class MockAjax {
     if (this.tableCache.has(tableName)) {
       return this.tableCache.get(tableName);
     }
-
     const util = new MockCRUDUtil(tableName);
     this.tableCache.set(tableName, util);
     return util;
@@ -237,7 +236,7 @@ class MockCRUDUtil {
 
   insert(dataObj) {
     return mockPromise(resolve => {
-      mockResult(this.tableName, {page: Math.floor(Math.random() * 10000), pageSize: 1});  // 为了生成一个主键, 反正是测试用的
+      mockResult(this.tableName, { page: Math.floor(Math.random() * 10000), pageSize: 1 });  // 为了生成一个主键, 反正是测试用的
       const tmpObj = result.data[0];
       Object.assign(tmpObj, dataObj);
       result.success = true;
@@ -281,7 +280,7 @@ class MockCRUDUtil {
               // 理论上来说服务端可以返回任意schema, 覆盖本地js的配置
               {
                 key: 'type',
-                options: [{key: '1', value: '来自服务端1'}, {key: '2', value: '来自服务端2'}, {key: '3', value: '来自服务端3'}],
+                options: [{ key: '1', value: '来自服务端1' }, { key: '2', value: '来自服务端2' }, { key: '3', value: '来自服务端3' }],
                 defaultValue: '2',
               },
             ],
@@ -291,13 +290,13 @@ class MockCRUDUtil {
                 key: 'name',
                 title: `选择姓名  ${this.counter}`,
                 showType: 'radio',
-                options: [{key: 'a', value: 'AA'}, {key: 'b', value: 'BB'}, {key: 'c', value: 'CC'}],
+                options: [{ key: 'a', value: 'AA' }, { key: 'b', value: 'BB' }, { key: 'c', value: 'CC' }],
               },
             ],
           },
         });
       } else {
-        resolve({success: true, data: {}});
+        resolve({ success: true, data: {} });
       }
     });
   }

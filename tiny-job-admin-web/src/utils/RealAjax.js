@@ -26,7 +26,7 @@ class Ajax {
    * @param headers 额外设置的http header
    * @returns {Promise}
    */
-  requestWrapper(method, url, {params, data, headers} = {}) {
+  requestWrapper(method, url, { params, data, headers } = {}) {
     logger.debug('method=%s, url=%s, params=%o, data=%o, headers=%o', method, url, params, data, headers);
     return new Promise((resolve, reject) => {
       const tmp = superagent(method, url);
@@ -69,11 +69,11 @@ class Ajax {
   // 基础的get/post方法
 
   get(url, opts = {}) {
-    return this.requestWrapper('GET', url, {...opts});
+    return this.requestWrapper('GET', url, { ...opts });
   }
 
   post(url, data, opts = {}) {
-    return this.requestWrapper('POST', url, {...opts, data});
+    return this.requestWrapper('POST', url, { ...opts, data });
   }
 
   // 业务方法
@@ -84,7 +84,14 @@ class Ajax {
    * @returns {*}
    */
   getCurrentUser() {
-    return this.get(`${globalConfig.getAPIPath()}${globalConfig.login.getCurrentUser}`);
+    //TODO: 接入用户体系
+    return Promise.resolve({
+      success: true,
+      code: 0,
+      total: 10000,
+      data: 'guest',
+    })
+    // return this.get(`${globalConfig.getAPIPath()}${globalConfig.login.getCurrentUser}`);
   }
 
   /**
@@ -94,8 +101,13 @@ class Ajax {
    * @param password
    */
   login(username, password) {
-    const headers = {'Content-Type': 'application/x-www-form-urlencoded'};
-    return this.post(`${globalConfig.getAPIPath()}${globalConfig.login.validate}`, {username, password}, {headers});
+    //TODO: 接入用户体系
+    return Promise.resolve({
+      success: true,
+      code: 0,
+      total: 10000,
+      data: 'guest',
+    });
   }
 
   /**
@@ -131,7 +143,7 @@ class CRUDUtil {
    * @returns {*}
    */
   select(queryObj) {
-    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/select`, queryObj);
+    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}`, queryObj);
   }
 
   /**
@@ -141,7 +153,7 @@ class CRUDUtil {
    * @returns {*}
    */
   insert(dataObj) {
-    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/insert`, dataObj);
+    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/add`, dataObj);
   }
 
   /**
@@ -153,7 +165,7 @@ class CRUDUtil {
    */
   update(keys = [], dataObj) {
     const tmp = keys.join(',');
-    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/update`, dataObj, {params: {keys: tmp}});
+    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/update`, dataObj, { params: { keys: tmp } });
   }
 
   /**
@@ -164,7 +176,7 @@ class CRUDUtil {
    */
   delete(keys = []) {
     const tmp = keys.join(',');
-    return this.ajax.get(`${globalConfig.getAPIPath()}/${this.tableName}/delete`, {params: {keys: tmp}});
+    return this.ajax.delete(`${globalConfig.getAPIPath()}/${this.tableName}/update`, { params: { keys: tmp } });
   }
 
   /**
