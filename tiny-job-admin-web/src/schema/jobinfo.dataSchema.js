@@ -25,7 +25,6 @@ module.exports = [
     dataType: 'int',
     showType: 'select',
     options: [{ key: 0, value: '已停止' }, { key: 1, value: '运行中' }],
-    disabled: true,
   },
   {
     key: 'jobType',
@@ -41,69 +40,87 @@ module.exports = [
     key: 'author',
     title: '创建者',
     dataType: 'varchar',
+    showInForm: false,
   },
   {
     key: 'createTime',
     title: '创建时间',
     dataType: 'datetime',
+    showInForm: false,
+    render: (text, record) => {
+      return new Date(text).format('yyyy-MM-dd HH:mm:ss');
+    },
   },
   {
     key: 'updateTime',
     title: '变更时间',
     dataType: 'datetime',
+    showInForm: false,
+    render: (text, record) => {
+      return new Date(text).format('yyyy-MM-dd HH:mm:ss')
+    },
   },
   {
     key: 'configId',
     title: 'configId',
     dataType: 'int',
     showInTable: false,
+    showInForm: false,
   },
   {
     key: 'executeTimeout',
     title: 'executeTimeout',
     dataType: 'int',
     showInTable: false,
+    showInForm: false,
   },
   {
     key: 'executeFailRetryCount',
     title: 'executeFailRetryCount',
     dataType: 'int',
     showInTable: false,
+    showInForm: false,
   },
   {
     key: 'childJobId',
     title: 'childJobId',
     dataType: 'int',
     showInTable: false,
+    showInForm: false,
   },
   {
     key: 'jobStatus',
     title: 'jobStatus',
     dataType: 'int',
     showInTable: false,
+    showInForm: false,
   },
   {
     key: 'triggerLastTime',
     title: 'triggerLastTime',
     dataType: 'int',
     showInTable: false,
+    showInForm: false,
   },
   {
     key: 'triggerNextTime',
     title: 'triggerNextTime',
     dataType: 'int',
     showInTable: false,
+    showInForm: false,
   },
   {
     key: 'jobVersion',
     title: 'jobVersion',
     dataType: 'int',
     showInTable: false,
+    showInForm: false,
   },
   {
     key: 'jobConfig',
     title: 'jobConfig',
     dataType: 'varchar',
     showInTable: false,
+    showInForm: false,
   },
 ];
