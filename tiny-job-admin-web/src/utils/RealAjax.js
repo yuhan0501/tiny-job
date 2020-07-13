@@ -143,7 +143,48 @@ class CRUDUtil {
    * @returns {*}
    */
   select(queryObj) {
-    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}`, queryObj);
+    // return Promise.resolve({
+    //   code: 0,
+    //   msg: null,
+    //   count: null,
+    //   data: [
+    //     {
+    //       id: 1,
+    //       jobCron: '0/5 * * * * ? *',
+    //       jobDesc: '测试',
+    //       author: 'yh',
+    //       jobType: 'http',
+    //       configId: 1,
+    //       executeBlockStrategy: 'true',
+    //       executeTimeout: 0,
+    //       executeFailRetryCount: 0,
+    //       childJobId: null,
+    //       jobStatus: 1,
+    //       triggerLastTime: 1594647565000,
+    //       triggerNextTime: 1594647570000,
+    //       jobVersion: 2,
+    //       updateTime: '2020-07-13T13:39:21.000+0000',
+    //       createTime: '2020-04-16T05:56:13.000+0000',
+    //       jobConfig: null,
+    //     },
+    //   ],
+    //   currentPage: 0,
+    //   totalRecord: 1,
+    //   pageSize: 0,
+    // }).then(resp => {
+    //   return {
+    //     ...resp,
+    //     success: resp.code === 0,
+    //     total: resp.totalRecord || 0,
+    //   }
+    // })
+    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/list`, queryObj).then(resp => {
+      return {
+        ...resp,
+        success: resp.code === 0,
+        total: resp.totalRecord || 0,
+      }
+    });
   }
 
   /**
@@ -164,8 +205,7 @@ class CRUDUtil {
    * @returns {*}
    */
   update(keys = [], dataObj) {
-    const tmp = keys.join(',');
-    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/update`, dataObj, { params: { keys: tmp } });
+    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/update`, dataObj, {});
   }
 
   /**
@@ -176,7 +216,7 @@ class CRUDUtil {
    */
   delete(keys = []) {
     const tmp = keys.join(',');
-    return this.ajax.delete(`${globalConfig.getAPIPath()}/${this.tableName}/update`, { params: { keys: tmp } });
+    return this.ajax.get(`${globalConfig.getAPIPath()}/${this.tableName}/update`, { params: { id: tmp } });
   }
 
   /**
