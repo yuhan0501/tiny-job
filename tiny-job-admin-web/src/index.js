@@ -34,7 +34,7 @@ const routes = (
         <IndexRoute component={Welcome} />
 
         <Route path="job">
-          <Route path="job-manage" tableName="job" getComponent={DBTableContainer} />
+          <Route path="job-manage" tableName="jobinfo" getComponent={DBTableContainer} />
         </Route>
 
         <Route path="*" component={Error} />

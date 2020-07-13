@@ -52,4 +52,58 @@ module.exports = [
     title: '变更时间',
     dataType: 'datetime',
   },
+  {
+    key: 'configId',
+    title: 'configId',
+    dataType: 'int',
+    showInTable: false,
+  },
+  {
+    key: 'executeTimeout',
+    title: 'executeTimeout',
+    dataType: 'int',
+    showInTable: false,
+  },
+  {
+    key: 'executeFailRetryCount',
+    title: 'executeFailRetryCount',
+    dataType: 'int',
+    showInTable: false,
+  },
+  {
+    key: 'childJobId',
+    title: 'childJobId',
+    dataType: 'int',
+    showInTable: false,
+  },
+  {
+    key: 'jobStatus',
+    title: 'jobStatus',
+    dataType: 'int',
+    showInTable: false,
+  },
+  {
+    key: 'triggerLastTime',
+    title: 'triggerLastTime',
+    dataType: 'int',
+    showInTable: false,
+  },
+  {
+    key: 'triggerNextTime',
+    title: 'triggerNextTime',
+    dataType: 'int',
+    showInTable: false,
+  },
+  {
+    key: 'jobVersion',
+    title: 'jobVersion',
+    dataType: 'int',
+    showInTable: false,
+  },
+  {
+    key: 'jobConfig',
+    title: 'jobConfig',
+    dataType: 'varchar',
+    showInTable: false,
+  },
 ];
