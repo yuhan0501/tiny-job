@@ -104,6 +104,17 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.1.1</version>
+                <configuration>
+                    <serverId>dev-aliyun</serverId>
+                    <imageName>registry.cn-shenzhen.aliyuncs.com/cxm-dev/tiny-job:0713</imageName>
+                    <dockerDirectory>../</dockerDirectory>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

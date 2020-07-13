@@ -16,18 +16,7 @@ import org.springframework.web.client.RestTemplate;
  **/
 @Configuration
 @ConfigurationProperties(prefix = "tiny-job")
-public class TinyJobConfig implements InitializingBean {
-    @Autowired
-    private JobTriggerPoolHelper jobTriggerPoolHelper;
-    @Autowired
-    private JobScheduleHelper jobScheduleHelper;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        jobTriggerPoolHelper.init();
-        jobScheduleHelper.start();
-    }
-
+public class TinyJobConfig {
 
     @Bean
     //客户端负载均衡
