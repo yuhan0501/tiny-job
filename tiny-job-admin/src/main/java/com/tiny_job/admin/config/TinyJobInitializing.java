@@ -1,7 +1,7 @@
 package com.tiny_job.admin.config;
 
-import com.tiny_job.admin.core.thread.JobScheduleHelper;
-import com.tiny_job.admin.core.thread.JobTriggerPoolHelper;
+import com.tiny_job.admin.thread.JobScheduleHelper;
+import com.tiny_job.admin.thread.JobTriggerPoolHelper;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
