@@ -1,4 +1,4 @@
-package com.tiny_job.admin.core.thread;
+package com.tiny_job.admin.thread;
 
 import com.tiny_job.admin.config.TinyJobConfig;
 import com.tiny_job.admin.dao.JobInfoHelper;

@@ -5,8 +5,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.annotation.Resource;
-
 /**
  * @description:
  * @author: yuhan
@@ -18,6 +16,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     /**
      * 添加静态资源文件，外部可以直接访问地址
+     *
      * @param registry
      */
     @Override
