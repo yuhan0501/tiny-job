@@ -24,7 +24,7 @@
         <spring-cloud.version>Hoxton.SR3</spring-cloud.version>
         <mybatis.springboot.version>2.1.2</mybatis.springboot.version>
         <tk.mybatis.version>2.1.5</tk.mybatis.version>
-        <mysql.connector.version>5.1.47</mysql.connector.version>
+        <mysql.connector.version>8.0.16</mysql.connector.version>
         <httpclient.version>4.5.7</httpclient.version>
         <pagehelper.version>1.2.13</pagehelper.version>
         <fast.json.version>1.2.56</fast.json.version>
