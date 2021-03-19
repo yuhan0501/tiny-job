@@ -43,24 +43,16 @@ public class JobScheduleHelper {
                 catch (InterruptedException e) {
                     logger.error(e.getMessage(), e);
                 }
-                logger.info("start-----");
                 Long nowTime = System.currentTimeMillis();
                 try {
                     List<JobInfo> jobInfos = jobInfoHelper.scheduleJobQuery(nowTime + PRE_READ_TIME * 2, PRE_SIZE);
                     jobInfos.forEach(jobInfo -> {
                         try {
-//                            if (jobInfo.getTriggerNextTime() >= nowTime) {
-//                                return;
-//                            }
-//                            jobInfo.setJobStatus(JobStatusEnum.SCHEDULING.getStatus());
                             int resultCount = jobInfoHelper.updateByOptimisticLock(jobInfo);
                             //影响的记录为0说明已经被其他线程处理，跳过此次job
                             if (resultCount == 0) {
                                 return;
                             }
-                            //将任务放入待执行队列
-                            logTime("next", jobInfo.getTriggerNextTime());
-                            logTime("now", nowTime);
 
                             //已经过期的任务，立即调度一次
                             if (jobInfo.getTriggerNextTime() < nowTime) {
@@ -69,7 +61,6 @@ public class JobScheduleHelper {
                             }
                             //判断是否是即将要调度
                             checkHighFrequency(jobInfo, nowTime);
-//                            jobInfo.setJobStatus(JobStatusEnum.NORMAL.getStatus());
                             logTime("final {}", jobInfo.getTriggerNextTime());
                             jobInfoHelper.updateWithoutOptimisticLock(jobInfo);
                         }
