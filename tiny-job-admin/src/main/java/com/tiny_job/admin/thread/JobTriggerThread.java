@@ -25,12 +25,8 @@ public class JobTriggerThread implements Runnable {
 
     @Override
     public void run() {
+        logger.debug("process job", jobInfo);
         adapter.processJob(jobInfo);
-        logTime("success", jobInfo.getTriggerNextTime());
     }
 
-    private void logTime(String msg, Long time) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 hh:mm:ss");
-        logger.info("{}:{}", msg, simpleDateFormat.format(time));
-    }
 }

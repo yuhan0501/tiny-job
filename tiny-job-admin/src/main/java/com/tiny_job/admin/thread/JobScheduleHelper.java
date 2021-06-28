@@ -51,8 +51,10 @@ public class JobScheduleHelper {
                             int resultCount = jobInfoHelper.updateByOptimisticLock(jobInfo);
                             //影响的记录为0说明已经被其他线程处理，跳过此次job
                             if (resultCount == 0) {
+                                logger.debug("NO task to scheduler");
                                 return;
                             }
+                            logger.debug("Try to trigger job", jobInfo);
 
                             //已经过期的任务，立即调度一次
                             if (jobInfo.getTriggerNextTime() < nowTime) {
