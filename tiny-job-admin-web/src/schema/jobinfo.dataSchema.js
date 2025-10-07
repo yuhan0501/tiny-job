@@ -30,6 +30,8 @@ module.exports = [
     key: 'jobType',
     title: '任务类型',
     dataType: 'varchar',
+    showType: 'select',
+    options: [{ key: 'http', value: 'HTTP调用' }, { key: 'shell', value: '脚本' }],
   },
   {
     key: 'executeBlockStrategy',
@@ -57,7 +59,7 @@ module.exports = [
     dataType: 'datetime',
     showInForm: false,
     render: (text, record) => {
-      return new Date(text).format('yyyy-MM-dd HH:mm:ss')
+      return text ? new Date(text).format('yyyy-MM-dd HH:mm:ss') : '';
     },
   },
   {
@@ -89,25 +91,22 @@ module.exports = [
     showInForm: false,
   },
   {
-    key: 'jobStatus',
-    title: 'jobStatus',
-    dataType: 'int',
-    showInTable: false,
-    showInForm: false,
-  },
-  {
     key: 'triggerLastTime',
-    title: 'triggerLastTime',
-    dataType: 'int',
-    showInTable: false,
+    title: '上次触发时间',
+    dataType: 'datetime',
     showInForm: false,
+    render: (text) => {
+      return text ? new Date(text).format('yyyy-MM-dd HH:mm:ss') : '';
+    },
   },
   {
     key: 'triggerNextTime',
-    title: 'triggerNextTime',
-    dataType: 'int',
-    showInTable: false,
+    title: '下次触发时间',
+    dataType: 'datetime',
     showInForm: false,
+    render: (text) => {
+      return text ? new Date(text).format('yyyy-MM-dd HH:mm:ss') : '';
+    },
   },
   {
     key: 'jobVersion',
