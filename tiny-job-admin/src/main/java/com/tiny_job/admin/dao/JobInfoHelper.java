@@ -7,10 +7,11 @@ import com.tiny_job.admin.exception.TinyJobExceptionAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 import tk.mybatis.mapper.entity.Condition;
-import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -34,7 +35,20 @@ public class JobInfoHelper {
      * @return 影响记录
      */
     public int updateByOptimisticLock(JobInfo jobInfo) {
-        return jobInfoMapper.updateByPrimaryKey(jobInfo);
+        Condition condition = new Condition(JobInfo.class);
+        condition.createCriteria()
+                .andEqualTo("id", jobInfo.getId())
+                .andEqualTo("updateTime", jobInfo.getUpdateTime());
+
+        Timestamp newUpdateTime = new Timestamp(System.currentTimeMillis());
+        JobInfo updateEntity = new JobInfo();
+        updateEntity.setId(jobInfo.getId());
+        updateEntity.setUpdateTime(newUpdateTime);
+        int updateCount = jobInfoMapper.updateByConditionSelective(updateEntity, condition);
+        if (updateCount > 0) {
+            jobInfo.setUpdateTime(newUpdateTime);
+        }
+        return updateCount;
     }
 
     public int updateWithoutOptimisticLock(JobInfo jobInfo) {
@@ -55,11 +69,20 @@ public class JobInfoHelper {
         return jobInfoMapper.scheduleJobQuery(scheduleTime, preSize);
     }
 
-    public List<JobInfo> jobInfoList(Integer jobStatus,String jobDesc){
-        JobInfo jobInfo = new JobInfo();
-        jobInfo.setJobStatus(jobStatus);
-        jobInfo.setJobDesc(jobDesc);
-        return jobInfoMapper.select(jobInfo);
+    public List<JobInfo> jobInfoList(Integer jobStatus,String jobDesc,String jobType){
+        Condition condition = new Condition(JobInfo.class);
+        Condition.Criteria criteria = condition.createCriteria();
+        if (jobStatus != null) {
+            criteria.andEqualTo("jobStatus", jobStatus);
+        }
+        if (StringUtils.hasText(jobDesc)) {
+            criteria.andLike("jobDesc", "%" + jobDesc.trim() + "%");
+        }
+        if (StringUtils.hasText(jobType)) {
+            criteria.andEqualTo("jobType", jobType.trim());
+        }
+        condition.orderBy("id").desc();
+        return jobInfoMapper.selectByCondition(condition);
     }
 
     /**

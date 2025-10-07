@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import javax.annotation.PreDestroy;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class JobScheduleHelper {
     private static Logger logger = LoggerFactory.getLogger(JobScheduleHelper.class);
     private Thread scheduleThread;
+    private volatile boolean running = false;
     private final int PRE_SIZE = 10;
     private final int PRE_READ_TIME = 5000;
 
@@ -34,14 +36,18 @@ public class JobScheduleHelper {
     private JobTriggerPoolHelper triggerPoolHelper;
 
     public void start() {
+        running = true;
         scheduleThread = new Thread(() -> {
-            while (true) {
-                //休眠一段时间
-                try {
-                    TimeUnit.MILLISECONDS.sleep(PRE_READ_TIME - System.currentTimeMillis() % 1000);
-                }
-                catch (InterruptedException e) {
-                    logger.error(e.getMessage(), e);
+            while (running && !Thread.currentThread().isInterrupted()) {
+                long sleepMillis = PRE_READ_TIME - System.currentTimeMillis() % 1000;
+                if (sleepMillis > 0) {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(sleepMillis);
+                    }
+                    catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
                 }
                 Long nowTime = System.currentTimeMillis();
                 try {
@@ -115,4 +121,11 @@ public class JobScheduleHelper {
         logger.info("{}:{}", msg, simpleDateFormat.format(time));
     }
 
+    @PreDestroy
+    public void destroy() {
+        running = false;
+        if (scheduleThread != null) {
+            scheduleThread.interrupt();
+        }
+    }
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import javax.annotation.PreDestroy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -37,7 +38,17 @@ public class JobTriggerPoolHelper {
     private ScheduledThreadPoolExecutor triggerPool;
 
     public void init() {
-        triggerPool = new ScheduledThreadPoolExecutor(tinyJobConfig.getTriggerPollSize(), runnable -> new Thread(runnable, " JobTriggerPoolHelper"));
+        int poolSize = tinyJobConfig.getTriggerPollSize() != null && tinyJobConfig.getTriggerPollSize() > 0
+                ? tinyJobConfig.getTriggerPollSize()
+                : Runtime.getRuntime().availableProcessors();
+        triggerPool = new ScheduledThreadPoolExecutor(poolSize, runnable -> {
+            Thread thread = new Thread(runnable, "JobTriggerPoolHelper");
+            thread.setDaemon(true);
+            return thread;
+        });
+        triggerPool.setRemoveOnCancelPolicy(true);
+        triggerPool.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        triggerPool.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
 //                new ThreadPoolExecutor(
 //                10,
 //                tinyJobConfig.getTriggerPollSize(),
@@ -65,13 +76,21 @@ public class JobTriggerPoolHelper {
 
     }
 
+    @PreDestroy
     public void shutdown() {
+        if (triggerPool == null) {
+            return;
+        }
         triggerPool.shutdown();
-        while (true) {
-            if (triggerPool.isTerminated()) {
-                logger.info("shut down JobTriggerPoolHelper success");
-                break;
+        try {
+            if (!triggerPool.awaitTermination(10, TimeUnit.SECONDS)) {
+                triggerPool.shutdownNow();
             }
         }
+        catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            triggerPool.shutdownNow();
+        }
+        logger.info("shut down JobTriggerPoolHelper success");
     }
 }
