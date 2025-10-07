@@ -54,6 +54,8 @@ public class JobScheduleHelper {
                 }
                 long nowTime = System.currentTimeMillis();
                 try {
+                    // 为了避免每次只计算单个任务的开销，这里批量查询一段时间窗口内的任务。窗口长度为预读时间的两倍，
+                    // 这样可以让调度线程有充足的时间在锁定记录后计算下一次触发时间并把任务投递到触发线程池。
                     List<JobInfo> jobInfos = jobInfoHelper.scheduleJobQuery(nowTime + PRE_READ_TIME * 2L, PRE_SIZE);
                     for (JobInfo jobInfo : jobInfos) {
                         try {
@@ -70,6 +72,7 @@ public class JobScheduleHelper {
             }
 
         });
+        // 守护线程可以让调度器在 Spring 容器关闭时自动退出，避免阻塞应用关闭流程。
         scheduleThread.setDaemon(true);
         scheduleThread.start();
     }
@@ -92,8 +95,13 @@ public class JobScheduleHelper {
 
         boolean committed = false;
         try {
+            // 在锁定后的对象快照上计算触发计划，保证时间窗口的一致性。
+            // buildSchedulePlan 会根据 cron 表达式计算当前锁定窗口内的所有触发点，
+            // 并给出下一次触发时间，用于更新数据库状态。
             SchedulePlan schedulePlan = buildSchedulePlan(jobInfo, nowTime);
             for (TriggerSlot slot : schedulePlan.getTriggerSlots()) {
+                // 触发线程池在独立线程中执行，为了避免多线程共享同一个 JobInfo 实例，
+                // 这里拷贝一份快照并只携带必要的时间信息。
                 JobInfo snapshot = new JobInfo();
                 BeanUtils.copyProperties(jobInfo, snapshot);
                 snapshot.setTriggerLastTime(slot.getPreviousFireTime());
@@ -108,6 +116,8 @@ public class JobScheduleHelper {
             }
 
             Long lastTriggerTime = schedulePlan.getLastTriggerTime();
+            // finalizeSchedule 会在数据库层面验证 update_time 与锁定时一致，
+            // 从而保证只有当前线程可以提交下一次触发时间，防止并发调度重复触发。
             committed = jobInfoHelper.finalizeSchedule(jobInfo, lockedUpdateTime, lockTriggerTime, lastTriggerTime, nextTriggerTime);
             if (!committed) {
                 logger.warn("failed to finalize schedule for job {}", jobInfo.getId());
@@ -115,6 +125,7 @@ public class JobScheduleHelper {
         }
         finally {
             if (!committed) {
+                // 调度失败时需要把 trigger_next_time 还原，避免后续任务长期处于锁定窗口。
                 jobInfoHelper.restoreScheduleLock(jobInfo, lockedUpdateTime, lockTriggerTime, originalNextTime, originalUpdateTime);
             }
         }

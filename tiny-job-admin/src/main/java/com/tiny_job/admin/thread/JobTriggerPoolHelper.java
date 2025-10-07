@@ -32,6 +32,7 @@ public class JobTriggerPoolHelper {
     @Resource
     private JobInfoHelper jobInfoHelper;
 
+    // 使用 ConcurrentHashMap 保证在触发线程异步读取执行器时的可见性与线程安全。
     private final Map<String, TinyJobExecutorBaseAdapter> tinyJobExecutor = new ConcurrentHashMap<>();
 
     @Autowired(required = false)
@@ -48,6 +49,8 @@ public class JobTriggerPoolHelper {
         int poolSize = tinyJobConfig.getTriggerPollSize() != null && tinyJobConfig.getTriggerPollSize() > 0
                 ? tinyJobConfig.getTriggerPollSize()
                 : Runtime.getRuntime().availableProcessors();
+        // ScheduledThreadPoolExecutor 提供了延迟调度能力，可确保每个任务按照计算出的时间被触发。
+        // 自定义线程工厂开启守护线程，避免应用关闭时阻塞退出。
         triggerPool = new ScheduledThreadPoolExecutor(poolSize, runnable -> {
             Thread thread = new Thread(runnable, "JobTriggerPoolHelper");
             thread.setDaemon(true);
@@ -88,6 +91,7 @@ public class JobTriggerPoolHelper {
         if (triggerPool == null) {
             return;
         }
+        // 优雅关闭线程池，尽可能等待已提交的任务完成，避免调度线程提前退出导致任务丢失。
         triggerPool.shutdown();
         try {
             if (!triggerPool.awaitTermination(10, TimeUnit.SECONDS)) {

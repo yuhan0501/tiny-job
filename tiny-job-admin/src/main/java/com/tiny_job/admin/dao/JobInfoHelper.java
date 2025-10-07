@@ -70,6 +70,8 @@ public class JobInfoHelper {
     }
 
     public boolean lockJobForSchedule(JobInfo jobInfo, long lockTriggerTime) {
+        // 通过同时匹配 update_time 与 trigger_next_time 来实现软锁，
+        // 保证只有一个调度线程可以进入锁定窗口并修改下一次触发时间。
         Condition condition = new Condition(JobInfo.class);
         condition.createCriteria()
                 .andEqualTo("id", jobInfo.getId())
@@ -92,6 +94,8 @@ public class JobInfoHelper {
 
     public boolean finalizeSchedule(JobInfo jobInfo, Timestamp lockedUpdateTime, long lockedTriggerTime,
                                     Long newTriggerLastTime, Long newTriggerNextTime) {
+        // finalizeSchedule 与 lockJobForSchedule 使用完全相同的条件，确保只有当前锁持有者
+        //（update_time 与 trigger_next_time 均未被其他线程修改）才能提交新的时间窗口。
         Condition condition = new Condition(JobInfo.class);
         condition.createCriteria()
                 .andEqualTo("id", jobInfo.getId())
@@ -116,6 +120,8 @@ public class JobInfoHelper {
 
     public void restoreScheduleLock(JobInfo jobInfo, Timestamp lockedUpdateTime, long lockedTriggerTime,
                                     Long originalTriggerNextTime, Timestamp originalUpdateTime) {
+        // 若 finalize 失败或出现异常，需要利用锁定时的快照还原 trigger_next_time，
+        // 防止记录一直停留在锁定窗口无法再次被调度线程扫描。
         Condition condition = new Condition(JobInfo.class);
         condition.createCriteria()
                 .andEqualTo("id", jobInfo.getId())
