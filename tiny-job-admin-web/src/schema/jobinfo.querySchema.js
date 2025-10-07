@@ -20,4 +20,12 @@ module.exports = [
     options: [{ key: '', value: '全部' }, { key: '0', value: '已停止' }, { key: '1', value: '运行中' }],
     defaultValue: '',
   },
+  {
+    key: 'jobType',
+    title: '任务类型',
+    dataType: 'varchar',
+    showType: 'select',
+    options: [{ key: '', value: '全部' }, { key: 'http', value: 'HTTP调用' }, { key: 'shell', value: '脚本' }],
+    defaultValue: '',
+  },
 ];
