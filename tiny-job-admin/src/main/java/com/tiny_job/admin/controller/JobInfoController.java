@@ -36,12 +36,14 @@ public class JobInfoController {
 
     @RequestMapping("/list")
     @ResponseBody
-    public CommonResult<List<JobInfo>> list(@RequestParam(required = false,defaultValue = "0")int currentPage,
-                                            @RequestParam(required = false,defaultValue = "0")int pageSize,
-                                            Integer jobStatus,String jobDesc) {
+    public CommonResult<List<JobInfo>> list(@RequestParam(required = false,defaultValue = "1")int currentPage,
+                                            @RequestParam(required = false,defaultValue = "20")int pageSize,
+                                            Integer jobStatus,String jobDesc,String jobType) {
         CommonResult<List<JobInfo>> commonResult = new CommonResult<>();
+        currentPage = currentPage <= 0 ? 1 : currentPage;
+        pageSize = pageSize <= 0 ? 20 : pageSize;
         Page page = PageHelper.startPage(currentPage,pageSize);
-        commonResult.setData(jobInfoHelper.jobInfoList(jobStatus,jobDesc));
+        commonResult.setData(jobInfoHelper.jobInfoList(jobStatus,jobDesc,jobType));
         commonResult.setCurrentPage(page.getPageNum());
         commonResult.setPageSize(page.getPageSize());
         commonResult.setTotalRecord(page.getTotal());
