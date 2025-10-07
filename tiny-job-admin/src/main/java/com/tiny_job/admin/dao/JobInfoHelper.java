@@ -69,6 +69,70 @@ public class JobInfoHelper {
         return jobInfoMapper.scheduleJobQuery(scheduleTime, preSize);
     }
 
+    public boolean lockJobForSchedule(JobInfo jobInfo, long lockTriggerTime) {
+        Condition condition = new Condition(JobInfo.class);
+        condition.createCriteria()
+                .andEqualTo("id", jobInfo.getId())
+                .andEqualTo("updateTime", jobInfo.getUpdateTime())
+                .andEqualTo("triggerNextTime", jobInfo.getTriggerNextTime());
+
+        Timestamp lockTimestamp = new Timestamp(System.currentTimeMillis());
+        JobInfo updateEntity = new JobInfo();
+        updateEntity.setId(jobInfo.getId());
+        updateEntity.setUpdateTime(lockTimestamp);
+        updateEntity.setTriggerNextTime(lockTriggerTime);
+        int updateCount = jobInfoMapper.updateByConditionSelective(updateEntity, condition);
+        if (updateCount > 0) {
+            jobInfo.setUpdateTime(lockTimestamp);
+            jobInfo.setTriggerNextTime(lockTriggerTime);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean finalizeSchedule(JobInfo jobInfo, Timestamp lockedUpdateTime, long lockedTriggerTime,
+                                    Long newTriggerLastTime, Long newTriggerNextTime) {
+        Condition condition = new Condition(JobInfo.class);
+        condition.createCriteria()
+                .andEqualTo("id", jobInfo.getId())
+                .andEqualTo("updateTime", lockedUpdateTime)
+                .andEqualTo("triggerNextTime", lockedTriggerTime);
+
+        Timestamp newUpdateTime = new Timestamp(System.currentTimeMillis());
+        JobInfo updateEntity = new JobInfo();
+        updateEntity.setId(jobInfo.getId());
+        updateEntity.setTriggerLastTime(newTriggerLastTime);
+        updateEntity.setTriggerNextTime(newTriggerNextTime);
+        updateEntity.setUpdateTime(newUpdateTime);
+        int updateCount = jobInfoMapper.updateByConditionSelective(updateEntity, condition);
+        if (updateCount > 0) {
+            jobInfo.setTriggerLastTime(newTriggerLastTime);
+            jobInfo.setTriggerNextTime(newTriggerNextTime);
+            jobInfo.setUpdateTime(newUpdateTime);
+            return true;
+        }
+        return false;
+    }
+
+    public void restoreScheduleLock(JobInfo jobInfo, Timestamp lockedUpdateTime, long lockedTriggerTime,
+                                    Long originalTriggerNextTime, Timestamp originalUpdateTime) {
+        Condition condition = new Condition(JobInfo.class);
+        condition.createCriteria()
+                .andEqualTo("id", jobInfo.getId())
+                .andEqualTo("updateTime", lockedUpdateTime)
+                .andEqualTo("triggerNextTime", lockedTriggerTime);
+
+        JobInfo updateEntity = new JobInfo();
+        updateEntity.setId(jobInfo.getId());
+        updateEntity.setTriggerNextTime(originalTriggerNextTime);
+        Timestamp fallbackUpdateTime = originalUpdateTime != null ? originalUpdateTime : new Timestamp(System.currentTimeMillis());
+        updateEntity.setUpdateTime(fallbackUpdateTime);
+        if (jobInfoMapper.updateByConditionSelective(updateEntity, condition) > 0) {
+            jobInfo.setTriggerNextTime(originalTriggerNextTime);
+            jobInfo.setUpdateTime(fallbackUpdateTime);
+        }
+    }
+
     public List<JobInfo> jobInfoList(Integer jobStatus,String jobDesc,String jobType){
         Condition condition = new Condition(JobInfo.class);
         Condition.Criteria criteria = condition.createCriteria();

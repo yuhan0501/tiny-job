@@ -32,8 +32,15 @@ public class JobTriggerPoolHelper {
     @Resource
     private JobInfoHelper jobInfoHelper;
 
-    @Autowired
-    private Map<String, TinyJobExecutorBaseAdapter> tinyJobExecutor = new ConcurrentHashMap<>();
+    private final Map<String, TinyJobExecutorBaseAdapter> tinyJobExecutor = new ConcurrentHashMap<>();
+
+    @Autowired(required = false)
+    public void setTinyJobExecutor(Map<String, TinyJobExecutorBaseAdapter> executors) {
+        tinyJobExecutor.clear();
+        if (executors != null) {
+            tinyJobExecutor.putAll(executors);
+        }
+    }
 
     private ScheduledThreadPoolExecutor triggerPool;
 
