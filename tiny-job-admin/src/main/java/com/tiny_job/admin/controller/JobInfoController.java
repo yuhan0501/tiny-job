@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -57,5 +58,59 @@ public class JobInfoController {
         CommonResult<List<JobInfo>> commonResult = new CommonResult<>();
         commonResult.setMsg("success");
         return commonResult;
+    }
+
+    @RequestMapping(value = "/pause", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult<Void> pause(@RequestParam("id") Long jobId) {
+        CommonResult<Void> result = new CommonResult<>();
+        if (jobId == null) {
+            result.setCode(1);
+            result.setMsg("job id can not be null");
+            return result;
+        }
+        try {
+            boolean success = jobInfoHelper.pauseJob(jobId);
+            if (success) {
+                result.setMsg("pause success");
+            }
+            else {
+                result.setCode(1);
+                result.setMsg("pause job failed");
+            }
+        }
+        catch (Exception e) {
+            logger.error("pause job {} error", jobId, e);
+            result.setCode(1);
+            result.setMsg("pause job error: " + e.getMessage());
+        }
+        return result;
+    }
+
+    @RequestMapping(value = "/resume", method = RequestMethod.POST)
+    @ResponseBody
+    public CommonResult<Void> resume(@RequestParam("id") Long jobId) {
+        CommonResult<Void> result = new CommonResult<>();
+        if (jobId == null) {
+            result.setCode(1);
+            result.setMsg("job id can not be null");
+            return result;
+        }
+        try {
+            boolean success = jobInfoHelper.resumeJob(jobId);
+            if (success) {
+                result.setMsg("resume success");
+            }
+            else {
+                result.setCode(1);
+                result.setMsg("resume job failed");
+            }
+        }
+        catch (Exception e) {
+            logger.error("resume job {} error", jobId, e);
+            result.setCode(1);
+            result.setMsg("resume job error: " + e.getMessage());
+        }
+        return result;
     }
 }

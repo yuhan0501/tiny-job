@@ -36,6 +36,7 @@
    - 请求参数与响应字段详见 API 文档 `api.md`，包括 `currentPage`、`pageSize`、`jobStatus`、`jobDesc`、`jobType` 等。【F:api.md†L1-L52】
 3. **查看调度状态**：列表中“上次触发时间”“下次触发时间”字段可帮助判断任务执行进度；字段值来源于后端调度线程对 `triggerLastTime` 与 `triggerNextTime` 的维护。【F:tiny-job-admin-web/src/schema/jobinfo.dataSchema.js†L45-L69】【F:tiny-job-admin/src/main/java/com/tiny_job/admin/thread/JobScheduleHelper.java†L118-L147】
 4. **执行与扩展**：任务触发后由 `JobTriggerPoolHelper` 调度至注册的执行器，实现 HTTP 调用或脚本执行等行为。新增执行类型时实现 `TinyJobExecutorBaseAdapter` 接口并注册为 Spring Bean 即可。【F:tiny-job-admin/src/main/java/com/tiny_job/admin/thread/JobTriggerPoolHelper.java†L64-L113】【F:tiny-job-admin/src/main/java/com/tiny_job/admin/executor/TinyJobExecutorBaseAdapter.java†L11-L13】
+5. **暂停/恢复任务**：任务需要临时停用时，可在列表“操作”列点击“暂停”，后端会更新 `job_status` 并阻止触发线程继续提交执行；待业务恢复后点击“恢复”，系统将按照 Cron 重新计算下一次触发时间并继续调度。【F:tiny-job-admin-web/src/schema/jobinfo.dataSchema.js†L70-L96】【F:tiny-job-admin/src/main/java/com/tiny_job/admin/dao/JobInfoHelper.java†L150-L204】【F:tiny-job-admin/src/main/java/com/tiny_job/admin/thread/JobTriggerPoolHelper.java†L72-L90】
 
 ## 5. API 快速参考
 完整接口示例参见仓库根目录的 `api.md`：

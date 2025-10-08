@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
+import ajax from '../utils/ajax';
+import globalConfig from '../config';
 module.exports = [
   {
     key: 'id',
@@ -121,5 +123,28 @@ module.exports = [
     dataType: 'varchar',
     showInTable: false,
     showInForm: false,
+  },
+  {
+    key: 'singleRecordActions',
+    title: '操作',
+    width: 200,
+    actions: [
+      {
+        name: '暂停',
+        type: 'request',
+        confirm: '确认暂停该任务吗？',
+        visible: record => record.$$rawData && record.$$rawData.jobStatus === 1,
+        request: record => ajax.post(`${globalConfig.getAPIPath()}/jobinfo/pause`, { id: record.$$rawData.id }),
+        successMessage: '任务已暂停',
+      },
+      {
+        name: '恢复',
+        type: 'request',
+        confirm: '确认恢复该任务吗？',
+        visible: record => record.$$rawData && record.$$rawData.jobStatus === 0,
+        request: record => ajax.post(`${globalConfig.getAPIPath()}/jobinfo/resume`, { id: record.$$rawData.id }),
+        successMessage: '任务已恢复',
+      },
+    ],
   },
 ];

@@ -3,7 +3,9 @@ package com.tiny_job.admin.dao;
 import com.tiny_job.admin.dao.entity.JobInfo;
 import com.tiny_job.admin.dao.mapper.JobConfigMapper;
 import com.tiny_job.admin.dao.mapper.JobInfoMapper;
+import com.tiny_job.admin.enums.JobStatusEnum;
 import com.tiny_job.admin.exception.TinyJobExceptionAssert;
+import com.tiny_job.admin.utils.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -12,6 +14,8 @@ import tk.mybatis.mapper.entity.Condition;
 
 import javax.annotation.Resource;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -170,6 +174,66 @@ public class JobInfoHelper {
         logger.debug("JobInfoHelper.findJobById:", jobInfo);
         return jobInfo;
     }
-     
 
+
+    public boolean pauseJob(Long jobId) {
+        return changeJobStatus(jobId, JobStatusEnum.STOP, false);
+    }
+
+    public boolean resumeJob(Long jobId) {
+        return changeJobStatus(jobId, JobStatusEnum.NORMAL, true);
+    }
+
+    public boolean isJobRunnable(Long jobId) {
+        Integer status = jobInfoMapper.findJobStatus(jobId);
+        return status != null && JobStatusEnum.NORMAL.getStatus().equals(status);
+    }
+
+    private boolean changeJobStatus(Long jobId, JobStatusEnum targetStatus, boolean refreshTrigger) {
+        for (int attempt = 0; attempt < 3; attempt++) {
+            JobInfo jobInfo = jobInfoMapper.selectByPrimaryKey(jobId);
+            if (jobInfo == null) {
+                return false;
+            }
+            if (targetStatus.getStatus().equals(jobInfo.getJobStatus())) {
+                return true;
+            }
+
+            Condition condition = new Condition(JobInfo.class);
+            condition.createCriteria()
+                    .andEqualTo("id", jobId)
+                    .andEqualTo("updateTime", jobInfo.getUpdateTime());
+
+            Timestamp newUpdateTime = new Timestamp(System.currentTimeMillis());
+            JobInfo updateEntity = new JobInfo();
+            updateEntity.setId(jobId);
+            updateEntity.setJobStatus(targetStatus.getStatus());
+            updateEntity.setUpdateTime(newUpdateTime);
+            if (refreshTrigger) {
+                Long nextTrigger = calculateNextTriggerTime(jobInfo);
+                updateEntity.setTriggerNextTime(nextTrigger);
+            }
+            int updateCount = jobInfoMapper.updateByConditionSelective(updateEntity, condition);
+            if (updateCount > 0) {
+                return true;
+            }
+        }
+        logger.warn("failed to change status for job {} to {}", jobId, targetStatus);
+        return false;
+    }
+
+    private Long calculateNextTriggerTime(JobInfo jobInfo) {
+        try {
+            CronExpression cronExpression = new CronExpression(jobInfo.getJobCron());
+            Date nextValid = cronExpression.getNextValidTimeAfter(new Date());
+            if (nextValid == null) {
+                return null;
+            }
+            return nextValid.getTime();
+        }
+        catch (ParseException e) {
+            logger.error("failed to calculate next trigger time for job {}", jobInfo.getId(), e);
+            return jobInfo.getTriggerNextTime();
+        }
+    }
 }

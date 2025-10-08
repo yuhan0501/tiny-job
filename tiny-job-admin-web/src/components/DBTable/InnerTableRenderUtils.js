@@ -1,4 +1,5 @@
 import React from 'react';
+import { Modal, message } from 'antd';
 import TableUtils from './TableUtils.js';
 import Logger from '../../utils/Logger';
 import Utils from '../../utils';
@@ -61,7 +62,7 @@ const RenderUtils = {
         col.render = this.getFileRender;
       } else if (field.key === ACTION_KEY && field.actions && field.actions.length > 0) {
         logger.debug('bind actions render for field %o', field);
-        col.render = this.getActionRender(field, primaryKey)(onSingleRecordUpdate, onSingleRecordDelete, onSingleRecordComponent);
+        col.render = this.getActionRender(field, primaryKey, innerTableComponent)(onSingleRecordUpdate, onSingleRecordDelete, onSingleRecordComponent);
       }
     });
 
@@ -117,6 +118,52 @@ const RenderUtils = {
     return null;
   },
 
+  runRequestAction(action, record, innerTableComponent) {
+    if (!action.request) {
+      logger.warn('request action defined without request handler');
+      return;
+    }
+    const refreshFn = innerTableComponent && innerTableComponent.props && innerTableComponent.props.refresh;
+    const execute = async () => {
+      try {
+        const res = await action.request(record, innerTableComponent);
+        const success = res && res.code === 0;
+        if (success) {
+          if (action.onSuccess) {
+            action.onSuccess(res, record, innerTableComponent);
+          }
+          const successMessage = action.successMessage || (res && res.msg) || null;
+          if (successMessage) {
+            message.success(successMessage);
+          }
+          if (refreshFn && action.refresh !== false) {
+            refreshFn();
+          }
+        } else {
+          const errorMsg = (res && (res.msg || res.message)) || action.errorMessage || '操作失败';
+          message.error(errorMsg);
+        }
+      } catch (error) {
+        const errorMsg = action.errorMessage || error.message || '操作失败';
+        message.error(errorMsg);
+      }
+    };
+
+    if (action.confirm) {
+      const modalConfig = typeof action.confirm === 'object'
+        ? action.confirm
+        : { title: '确认操作', content: action.confirm };
+      Modal.confirm({
+        okText: modalConfig.okText || '确认',
+        cancelText: modalConfig.cancelText || '取消',
+        ...modalConfig,
+        onOk: () => execute(),
+      });
+    } else {
+      execute();
+    }
+  },
+
   /**
    * 渲染自定义操作列
    *
@@ -124,7 +171,7 @@ const RenderUtils = {
    * @param primaryKey
    * @returns {function(): function()}
    */
-  getActionRender(field, primaryKey) {
+  getActionRender(field, primaryKey, innerTableComponent) {
     // 返回一个高阶函数, 输入是3个函数
     // 1. singleRecordUpdate用于更新单条记录的函数, 参数是(record:记录本身, updateKeys:要更新哪些字段)
     // 2. singleRecordDelete用于删除单条记录, 参数是record
@@ -180,6 +227,12 @@ const RenderUtils = {
           case 'component':
             tmp = <a href="#" key={i}
                      onClick={e => {e.preventDefault();singleRecordComponent(record, action.component, action.name);}}>
+              {action.name}
+            </a>;
+            break;
+          case 'request':
+            tmp = <a href="#" key={i}
+                     onClick={e => {e.preventDefault();this.runRequestAction(action, record, innerTableComponent);}}>
               {action.name}
             </a>;
             break;

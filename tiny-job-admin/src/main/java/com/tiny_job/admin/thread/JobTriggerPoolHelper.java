@@ -74,14 +74,21 @@ public class JobTriggerPoolHelper {
         JobInfo copyOf = new JobInfo();
         BeanUtils.copyProperties(jobInfo, copyOf);
         JobTriggerThread triggerThread = new JobTriggerThread(copyOf, tinyJobExecutor.get(jobInfo.getJobType()));
+        Runnable safeTrigger = () -> {
+            if (!jobInfoHelper.isJobRunnable(jobInfo.getId())) {
+                logger.info("skip trigger for job {} because status is not running", jobInfo.getId());
+                return;
+            }
+            triggerThread.run();
+        };
         //小于0说明是延期的任务，立即执行
         if (delay <= 0) {
-            triggerPool.execute(triggerThread);
+            triggerPool.execute(safeTrigger);
 
         }
         //大于0说明还未到调度时间,延迟调度
         else {
-            triggerPool.schedule(triggerThread, delay, TimeUnit.MILLISECONDS);
+            triggerPool.schedule(safeTrigger, delay, TimeUnit.MILLISECONDS);
         }
 
     }
