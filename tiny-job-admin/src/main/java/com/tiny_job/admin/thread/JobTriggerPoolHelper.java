@@ -4,6 +4,7 @@ import com.tiny_job.admin.config.TinyJobConfig;
 import com.tiny_job.admin.dao.JobInfoHelper;
 import com.tiny_job.admin.dao.entity.JobInfo;
 import com.tiny_job.admin.executor.TinyJobExecutorBaseAdapter;
+import com.tiny_job.admin.control.ExecutionControlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -32,6 +33,9 @@ public class JobTriggerPoolHelper {
     private JobInfoHelper jobInfoHelper;
 
     @Autowired
+    private ExecutionControlService executionControlService;
+
+    @Autowired
     private Map<String, TinyJobExecutorBaseAdapter> tinyJobExecutor = new ConcurrentHashMap<>();
 
     private ScheduledThreadPoolExecutor triggerPool;
@@ -49,6 +53,10 @@ public class JobTriggerPoolHelper {
     }
 
     public void triggerJob(JobInfo jobInfo, long delay) {
+        if (executionControlService.isPaused()) {
+            logger.debug("global pause active, skip trigger for job {}", jobInfo.getId());
+            return;
+        }
         logger.debug("trigger job:{}", delay);
         JobInfo copyOf = new JobInfo();
         BeanUtils.copyProperties(jobInfo, copyOf);

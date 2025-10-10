@@ -194,7 +194,11 @@ class CRUDUtil {
    * @returns {*}
    */
   insert(dataObj) {
-    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/add`, dataObj);
+    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/add`, dataObj)
+      .then(resp => ({
+        ...resp,
+        success: resp.code === 0,
+      }));
   }
 
   /**
@@ -205,7 +209,18 @@ class CRUDUtil {
    * @returns {*}
    */
   update(keys = [], dataObj) {
-    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/update`, dataObj, {});
+    const payload = Object.assign({}, dataObj);
+    if (keys && keys.length === 1 && payload.id === undefined) {
+      payload.id = keys[0];
+    }
+    if (keys && keys.length > 1 && payload.ids === undefined) {
+      payload.ids = keys;
+    }
+    return this.ajax.post(`${globalConfig.getAPIPath()}/${this.tableName}/update`, payload, {})
+      .then(resp => ({
+        ...resp,
+        success: resp.code === 0,
+      }));
   }
 
   /**
@@ -216,7 +231,11 @@ class CRUDUtil {
    */
   delete(keys = []) {
     const tmp = keys.join(',');
-    return this.ajax.get(`${globalConfig.getAPIPath()}/${this.tableName}/update`, { params: { id: tmp } });
+    return this.ajax.get(`${globalConfig.getAPIPath()}/${this.tableName}/update`, { params: { id: tmp } })
+      .then(resp => ({
+        ...resp,
+        success: resp.code === 0,
+      }));
   }
 
   /**

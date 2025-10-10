@@ -96,6 +96,93 @@ class InnerTable extends React.PureComponent {
     InnerTableRenderUtils.reset();
   }
 
+  getValueByPath = (obj, path) => {
+    if (!obj) {
+      return undefined;
+    }
+    if (!path || path.indexOf('.') === -1) {
+      return obj[path];
+    }
+    const segments = path.split('.');
+    let current = obj;
+    for (const segment of segments) {
+      if (current === undefined || current === null) {
+        return undefined;
+      }
+      current = current[segment];
+    }
+    return current;
+  };
+
+  normalizeFieldValueForForm = (field, value) => {
+    if (value === undefined || value === null) {
+      return value;
+    }
+    if (!field || !Array.isArray(field.options)) {
+      return value;
+    }
+    const selectableTypes = new Set(['select', 'radio', 'checkbox', 'multiSelect']);
+    if (!selectableTypes.has(field.showType)) {
+      return value;
+    }
+    const mapSingleValue = (input) => {
+      if (input === undefined || input === null) {
+        return input;
+      }
+      const matched = field.options.find(option => option.key === input || option.value === input);
+      return matched ? matched.key : input;
+    };
+    if (Array.isArray(value)) {
+      return value.map(mapSingleValue);
+    }
+    return mapSingleValue(value);
+  };
+
+  setValueByPath = (obj, path, value) => {
+    if (!path) {
+      return;
+    }
+    if (value === undefined) {
+      return;
+    }
+    if (path.indexOf('.') === -1) {
+      obj[path] = value;
+      return;
+    }
+    const segments = path.split('.');
+    let current = obj;
+    for (let i = 0; i < segments.length - 1; i++) {
+      const segment = segments[i];
+      if (!current[segment] || typeof current[segment] !== 'object') {
+        current[segment] = {};
+      }
+      current = current[segment];
+    }
+    current[segments[segments.length - 1]] = value;
+  };
+
+  buildNestedPayload = (flatObj, sourceRaw) => {
+    const nested = {};
+    Object.keys(flatObj).forEach(key => {
+      if (!Object.prototype.hasOwnProperty.call(flatObj, key)) {
+        return;
+      }
+      if (key.indexOf('$$') === 0) {
+        return;
+      }
+      this.setValueByPath(nested, key, flatObj[key]);
+    });
+    if (sourceRaw && sourceRaw.jobConfig) {
+      if (!nested.jobConfig) {
+        nested.jobConfig = {};
+      }
+      if (nested.jobConfig.id === undefined && sourceRaw.jobConfig.id !== undefined) {
+        nested.jobConfig.id = sourceRaw.jobConfig.id;
+      }
+    }
+    return nested;
+  };
+
 
   /*下面是一些数据处理相关的方法*/
 
@@ -149,23 +236,37 @@ class InnerTable extends React.PureComponent {
   transformRawDataToTable(obj) {
     const newObj = {};
 
-    // 这段代码真是好蛋疼...
-    for (const key in obj) {
-      if (this.fieldMap.get(key).$$optionMap) {
-        const optionMap = this.fieldMap.get(key).$$optionMap;
-        if (obj[key] instanceof Array) {
-          const newArray = [];
-          for (const optionKey of obj[key]) {
-            newArray.push(optionMap[optionKey]);
-          }
+    this.fieldMap.forEach((field, key) => {
+      if (key === ACTION_KEY) {
+        return;
+      }
+      const value = this.getValueByPath(obj, key);
+      if (value === undefined || value === null) {
+        return;
+      }
+      if (field && field.$$optionMap) {
+        const optionMap = field.$$optionMap;
+        if (value instanceof Array) {
+          const newArray = value.map(optionKey => optionMap[optionKey]);
           newObj[key] = newArray.join(',');
-        } else {
-          newObj[key] = optionMap[obj[key]];
         }
-      } else {
+        else {
+          newObj[key] = optionMap[value];
+        }
+      }
+      else if (Array.isArray(value)) {
+        newObj[key] = value.join(',');
+      }
+      else if (typeof value !== 'object') {
+        newObj[key] = value;
+      }
+    });
+
+    Object.keys(obj).forEach(key => {
+      if (newObj[key] === undefined && typeof obj[key] !== 'object') {
         newObj[key] = obj[key];
       }
-    }
+    });
 
     newObj.$$rawData = obj;  // 原始数据还是要保存下的, 后面update会用到
     return newObj;
@@ -178,17 +279,23 @@ class InnerTable extends React.PureComponent {
   transformRawDataToForm(obj) {
     const newObj = {};
 
-    for (const key in obj) {
-      // rawData中可能有些undefined或null的字段, 过滤掉
-      if (!obj[key])
-        continue;
-
-      if (this.fieldMap.get(key).dataType === 'datetime') {  // 判断是否是日期类型的字段
-        newObj[key] = moment(obj[key]);
-      } else {
-        newObj[key] = obj[key];
+    this.fieldMap.forEach((field, key) => {
+      if (key === ACTION_KEY || field.showInForm === false) {
+        return;
       }
-    }
+      const value = this.getValueByPath(obj, key);
+      if (value === undefined || value === null) {
+        newObj[key] = value;
+        return;
+      }
+      let resolvedValue = value;
+      if (field.dataType === 'datetime') {  // 判断是否是日期类型的字段
+        resolvedValue = moment(value);
+      } else {
+        resolvedValue = this.normalizeFieldValueForForm(field, value);
+      }
+      newObj[key] = resolvedValue;
+    });
 
     return newObj;
   }
@@ -547,7 +654,8 @@ class InnerTable extends React.PureComponent {
     const CRUD = ajax.CRUD(this.props.tableName);
     const hide = message.loading('正在新增...', 0);
     try {
-      const res = await CRUD.insert(obj);
+      const payload = this.buildNestedPayload(obj);
+      const res = await CRUD.insert(payload);
       hide();
       if (res.success) {
         notification.success({
@@ -574,6 +682,9 @@ class InnerTable extends React.PureComponent {
         }
 
         this.setState({ selectedRowKeys: [], data: newData });
+        if (this.props.refresh) {
+          await this.props.refresh();
+        }
       } else {
         this.error(res.message);
       }
@@ -591,7 +702,14 @@ class InnerTable extends React.PureComponent {
     const CRUD = ajax.CRUD(this.props.tableName);
     const hide = message.loading('正在更新...', 0);
     try {
-      const res = await CRUD.update(keys, obj);
+      const payload = Object.assign({}, obj);
+      const sourceRecord = keys && keys.length === 1 ? this.state.data.find(record => record.key === keys[0]) : null;
+      const sourceRaw = sourceRecord ? sourceRecord.$$rawData : null;
+      const nestedPayload = this.buildNestedPayload(payload, sourceRaw);
+      if (keys && keys.length === 1 && nestedPayload.id === undefined) {
+        nestedPayload.id = keys[0];
+      }
+      const res = await CRUD.update(keys, nestedPayload);
       hide();
       if (res.success) {
         notification.success({
@@ -600,21 +718,30 @@ class InnerTable extends React.PureComponent {
           duration: 3,
         });
 
-        // 数据变化后, 刷新下表格
-        const transformedData = this.transformRawDataToTable(obj);
-        const newData = [];
-        const keySet = new Set(keys);  // array转set
-        for (const record of this.state.data) {
-          if (keySet.has(record.key)) {  // 是否是被更新的记录
-            const newRecord = Object.assign({}, record, transformedData); // 这个应该是浅拷贝
-            newRecord.$$rawData = Object.assign({}, record.$$rawData, transformedData.$$rawData);
-            logger.debug('newRecord = %o', newRecord);
-            newData.push(newRecord);
-          } else {
-            newData.push(record);
-          }
+        this.setState({ selectedRowKeys: [] });
+
+        if (this.props.refresh) {
+          await this.props.refresh();
         }
-        this.setState({ selectedRowKeys: [], data: newData });
+        else {
+          const mergedRaw = Object.assign({}, sourceRaw || {}, nestedPayload);
+          if (sourceRaw && nestedPayload.jobConfig) {
+            mergedRaw.jobConfig = Object.assign({}, sourceRaw.jobConfig || {}, nestedPayload.jobConfig);
+          }
+          const transformedData = this.transformRawDataToTable(mergedRaw);
+          const newData = [];
+          const keySet = new Set(keys);
+          for (const record of this.state.data) {
+            if (keySet.has(record.key)) {
+              const newRecord = Object.assign({}, record, transformedData);
+              newRecord.$$rawData = mergedRaw;
+              newData.push(newRecord);
+            } else {
+              newData.push(record);
+            }
+          }
+          this.setState({ data: newData });
+        }
       } else {
         this.error(res.message);
       }

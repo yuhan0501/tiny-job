@@ -3,6 +3,7 @@ package com.tiny_job.admin.thread;
 import com.tiny_job.admin.dao.JobInfoHelper;
 import com.tiny_job.admin.dao.entity.JobInfo;
 import com.tiny_job.admin.utils.CronExpression;
+import com.tiny_job.admin.control.ExecutionControlService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class JobScheduleHelper {
     @Autowired
     private JobTriggerPoolHelper triggerPoolHelper;
 
+    @Autowired
+    private ExecutionControlService executionControlService;
+
     public void start() {
         scheduleThread = new Thread(() -> {
             while (true) {
@@ -45,9 +49,17 @@ public class JobScheduleHelper {
                 }
                 Long nowTime = System.currentTimeMillis();
                 try {
+                    if (executionControlService.isPaused()) {
+                        logger.debug("scheduler paused, skip scheduling loop");
+                        continue;
+                    }
                     List<JobInfo> jobInfos = jobInfoHelper.scheduleJobQuery(nowTime + PRE_READ_TIME * 2, PRE_SIZE);
                     jobInfos.forEach(jobInfo -> {
                         try {
+                            if (executionControlService.isPaused()) {
+                                logger.debug("scheduler paused, skip job {}", jobInfo.getId());
+                                return;
+                            }
                             int resultCount = jobInfoHelper.updateByOptimisticLock(jobInfo);
                             //影响的记录为0说明已经被其他线程处理，跳过此次job
                             if (resultCount == 0) {

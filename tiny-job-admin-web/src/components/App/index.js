@@ -33,7 +33,7 @@ class App extends React.Component {
   // 3. Login组件中登录成功后, 会触发一个loginSuccess action, 修改redux中的状态, 进而触发App组件的re-render
 
   state = {
-    tryingLogin: true, // App组件要尝试登录, 在屏幕正中显示一个正加载的动画
+    tryingLogin: false, // 默认不再展示登录过程
 
     // tab模式相关的状态
     currentTabKey: '',  // 当前激活的是哪个tab

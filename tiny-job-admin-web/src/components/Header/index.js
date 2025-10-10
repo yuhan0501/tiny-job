@@ -35,12 +35,7 @@ class Header extends React.PureComponent {
     const paths = [];
 
     // 这一项菜单是必须有的, 不需要在配置文件里配置
-    const logoutMenuItem = <MenuItem key="logout">
-      <Icon type="logout"/>
-      <a href={`${globalConfig.getAPIPath()}${globalConfig.login.logout}`}>注销</a>
-    </MenuItem>;
-
-    // header右侧必须是用户菜单
+    // header右侧菜单
     let userMenuItems = null;
 
     const menu = headerMenu.map((level1) => {
@@ -101,15 +96,7 @@ class Header extends React.PureComponent {
     this.menu = menu;
 
     // 注意用户菜单的最后一项必定是注销
-    const userMenu = (
-      <SubMenu title={<span><Icon type="user" />{this.props.userName}</span>}>
-        {userMenuItems && userMenuItems[0] ? userMenuItems : null}
-        <Menu.Divider />
-        {logoutMenuItem}
-      </SubMenu>
-    );
-
-    this.userMenu = userMenu;
+    this.userMenu = null;
   }
 
   // FIXME: 这里其实有个bug, 如果菜单名称很长可能会导致overflow, 出现滚动条
@@ -120,7 +107,6 @@ class Header extends React.PureComponent {
       <div className="ant-layout-header">
         {/*定义header中的菜单, 从右向左依次是注销/用户菜单/其他自定义菜单*/}
         <Menu className="header-menu" mode="horizontal">
-          {this.userMenu}
           {this.menu}
         </Menu>
       </div>

@@ -23,6 +23,21 @@ const sidebarMenu = [
       },
     ],
   },
+  {
+    key: 'operations',
+    name: '运维中心',
+    icon: 'tool',
+    child: [
+      {
+        key: 'pause-control',
+        name: '任务总控',
+      },
+      {
+        key: 'job-dashboard',
+        name: '调度监控',
+      },
+    ],
+  },
 ];
 
 export default sidebarMenu;
@@ -32,38 +47,15 @@ export default sidebarMenu;
 // 另外注意这个菜单定义的顺序是从右向左的, 因为样式是float:right
 export const headerMenu = [
   {
-    // 一个特殊的key, 定义用户菜单, 在这个submenu下面设置icon/name不会生效
-    key: 'userMenu',
-    child: [
-      {
-        key: 'modifyUser',
-        name: '修改用户信息',
-        icon: 'bulb',
-        // 对于headerMenu的菜单项, 可以让它跳到外部地址, 如果设置了url属性, 就会打开一个新窗口
-        // 如果不设置url属性, 行为和sidebarMenu是一样的, 激活特定的组件, 注意在index.js中配置好路由, 否则会404
-        url: 'http://jxy.me',
-      },
-      {
-        key: 'user222',
-        name: '药药切克闹',
-        icon: 'rocket',
-      },
-      {
-        key: 'user333',
-        name: '选项3',
-        child: [
-          {
-            key: 'user333aaa',
-            name: 'user333aaa',
-            icon: 'windows',
-          },
-          {
-            key: 'user333bbb',
-            name: 'user333bbb',
-            url: 'http://jxy.me',
-          },
-        ],
-      },
-    ],
+    key: 'usageGuide',
+    name: '使用指南',
+    icon: 'book',
+    url: '/tiny-job/static/index.html',
+  },
+  {
+    key: 'releaseNotes',
+    name: '发布记录',
+    icon: 'profile',
+    url: '/tiny-job/static/index.html#release',
   },
 ];

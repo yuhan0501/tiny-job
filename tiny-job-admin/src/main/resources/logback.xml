@@ -19,12 +19,8 @@
     <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder
-            by default -->
         <encoder>
-            <pattern>%X{logType}|%level|%X{hostAddress}|%X{pid}|%d{yyyy-MM-dd
-                HH:mm:ss:SSSSSS}|%X{operatorId}|%X{busiId}|%F:%L|%M|%X{errorCode}|%thread|%X{messegeCode}|%X{PtxId}|%message%n
-            </pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -35,8 +31,7 @@
     <logger name="com.tiny_job" level="${BUSINESS_LOG_LEVEL}"/>
 
 
-    <root>
-        <level value="INFO"/>
+    <root level="${BUSINESS_LOG_LEVEL}">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

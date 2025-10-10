@@ -14,6 +14,8 @@ import App from './components/App';
 import Welcome from './components/Welcome';
 import Error from './components/Error';
 import Hello from './components/Hello';
+import PauseControl from './components/PauseControl';
+import JobDashboard from './components/JobDashboard';
 //import DBTable from './components/DBTable';
 
 // 将DBTable组件做成动态路由, 减小bundle size
@@ -35,6 +37,11 @@ const routes = (
 
         <Route path="job">
           <Route path="job-manage" tableName="jobinfo" getComponent={DBTableContainer} />
+        </Route>
+
+        <Route path="operations">
+          <Route path="pause-control" component={PauseControl} />
+          <Route path="job-dashboard" component={JobDashboard} />
         </Route>
 
         <Route path="*" component={Error} />

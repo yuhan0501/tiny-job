@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://rm-wz9hs2yy95dgy9723oo.mysql.rds.aliyuncs.com:3306/tiny-job?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    username: tiny-job
+    password: "%28Sawrqy}FM"
+    hikari:
+      idleTimeout: 300000
+      maxLifetime: 600000
+      maximumPoolSize: 100
+      minimumIdle: 2
+      validationTimeout: 300000
+      connectionTimeout: 60000
+      connectionTestQuery: select 1
+pagehelper:
+  helperDialect: mysql

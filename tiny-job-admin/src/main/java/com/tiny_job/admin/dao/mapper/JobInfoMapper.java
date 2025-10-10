@@ -19,5 +19,7 @@ public interface JobInfoMapper extends tk.mybatis.mapper.common.Mapper<JobInfo>,
             "limit #{size}")
     List<JobInfo> scheduleJobQuery(@Param("triggerTime") Long triggerTime, @Param("size") int size);
 
+    @Select("select count(*) from job_info where job_status = #{status}")
+    int countByStatus(@Param("status") int status);
 
 }

@@ -1,5 +1,6 @@
 package com.tiny_job.admin.dao;
 
+import com.tiny_job.admin.dao.entity.JobConfig;
 import com.tiny_job.admin.dao.entity.JobInfo;
 import com.tiny_job.admin.dao.mapper.JobConfigMapper;
 import com.tiny_job.admin.dao.mapper.JobInfoMapper;
@@ -59,7 +60,13 @@ public class JobInfoHelper {
         JobInfo jobInfo = new JobInfo();
         jobInfo.setJobStatus(jobStatus);
         jobInfo.setJobDesc(jobDesc);
-        return jobInfoMapper.select(jobInfo);
+        List<JobInfo> list = jobInfoMapper.select(jobInfo);
+        list.forEach(info -> {
+            if (info.getConfigId() != null) {
+                info.setJobConfig(jobConfigMapper.selectByPrimaryKey(info.getConfigId()));
+            }
+        });
+        return list;
     }
 
     /**
@@ -77,6 +84,23 @@ public class JobInfoHelper {
         logger.debug("JobInfoHelper.findJobById:", jobInfo);
         return jobInfo;
     }
-     
+
+    /**
+     * 针对任务信息的选择性更新
+     *
+     * @param jobInfo 更新内容（必须包含主键）
+     * @return 影响行数
+     */
+    public int updateSelective(JobInfo jobInfo) {
+        return jobInfoMapper.updateByPrimaryKeySelective(jobInfo);
+    }
+
+    public int updateJobConfigSelective(JobConfig jobConfig) {
+        return jobConfigMapper.updateByPrimaryKeySelective(jobConfig);
+    }
+
+    public int countRunningJobs() {
+        return jobInfoMapper.countByStatus(1);
+    }
 
 }

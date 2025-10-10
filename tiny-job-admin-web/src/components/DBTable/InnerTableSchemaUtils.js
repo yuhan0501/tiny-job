@@ -11,6 +11,7 @@ import {
 } from 'antd';
 import TableUtils from './TableUtils.js';
 import FileUploader from '../FileUploader';
+import CronField from '../CronField';
 import moment from 'moment';
 import Logger from '../../utils/Logger';
 import {ACTION_KEY} from './InnerTableRenderUtils';
@@ -278,6 +279,8 @@ const SchemaUtils = {
         return this.transformFile(field);
       case 'cascader':
         return this.transformCascader(field);
+      case 'cron':
+        return this.transformCron(field);
       default:
         return this.transformNormal(field);
     }
@@ -418,6 +421,16 @@ const SchemaUtils = {
     })(
       <FileUploader max={field.max} url={field.url} sizeLimit={field.sizeLimit} accept={field.accept}
                     placeholder={field.placeholder}/>
+    ), field);
+  },
+
+  transformCron(field) {
+    logger.debug('transform field %o to cron component', field);
+    return this.colWrapper((getFieldDecorator, forUpdate) => getFieldDecorator(field.key, {
+      initialValue: forUpdate ? undefined : field.defaultValue,
+      rules: forUpdate ? field.$$updateValidator : field.validator,
+    })(
+      <CronField placeholder={field.placeholder} disabled={field.disabled}/>
     ), field);
   },
 

@@ -3,32 +3,21 @@ server:
   servlet:
     context-path: /tiny-job
 spring:
+  profiles:
+    active: h2
   resources:
     static-locations: classpath:static/
   thymeleaf:
     mode: HTML5
     cache: false
-  #  cloud:
-  #    zookeeper:
-  #      connect-string: 127.0.0.1:2181
-  datasource:
-    driverClassName: com.mysql.jdbc.Driver
-    password: "%28Sawrqy}FM"
-    url: jdbc:mysql://rm-wz9hs2yy95dgy9723oo.mysql.rds.aliyuncs.com:3306/tiny-job?useUnicode=true&characterEncoding=utf-8
-    username: tiny-job
-    hikari:
-      idleTimeout: 300000
-      maxLifetime: 600000
-      maximumPoolSize: 100
-      minimumIdle: 2
-      validationTimeout: 300000
-      connectionTimeout: 60000
-      connectionTestQuery: select 1
-
+pagehelper:
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
 tiny-job:
   triggerPollSize: 100
   log:
-    level: info
+    level: debug
