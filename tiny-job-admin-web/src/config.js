@@ -9,7 +9,7 @@
 // 遵循统一的规范, 好维护, 交给其他人也比较简单
 
 module.exports = {
-  name: 'Ting-Job管理后台',  // 项目的名字
+  name: 'Tiny-Job管理后台',  // 项目的名字
   favicon: 'http://jxy.me/favicon.ico',  // 设置网页的favicon, 可以是外链, 也可以是本地
   footer: '<a>Tiny-job</a>版权所有 © 2015-2099',  // footer中显示的字, 可以嵌入html标签
 

@@ -4,24 +4,17 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.tiny_job.admin.controller.model.CommonResult;
 import com.tiny_job.admin.dao.JobInfoHelper;
-import com.tiny_job.admin.dao.entity.JobConfig;
 import com.tiny_job.admin.dao.entity.JobInfo;
-import com.tiny_job.admin.utils.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
 
 /**
