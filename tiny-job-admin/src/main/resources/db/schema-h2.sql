@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS job_log;
 DROP TABLE IF EXISTS job_info;
 DROP TABLE IF EXISTS job_config;
+DROP TABLE IF EXISTS job_control_state;
 DROP TABLE IF EXISTS job_lock;
 
 CREATE TABLE job_config (
@@ -47,5 +48,13 @@ CREATE TABLE job_log (
 );
 
 CREATE TABLE job_lock (
-    lock_name VARCHAR(64) PRIMARY KEY
+    lock_name VARCHAR(64) PRIMARY KEY,
+    owner VARCHAR(128),
+    expires_at BIGINT DEFAULT 0
+);
+
+CREATE TABLE job_control_state (
+    id INT PRIMARY KEY,
+    paused TINYINT DEFAULT 0,
+    paused_at BIGINT DEFAULT -1
 );

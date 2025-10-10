@@ -10,4 +10,5 @@ VALUES ('0/30 * * * * ?', 'Sample HTTP job', 'dev', 'http', 1, 'SERIAL',
         DATEDIFF('MILLISECOND', TIMESTAMP '1970-01-01 00:00:00', CURRENT_TIMESTAMP()) + 30000,
         1, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());
 
-INSERT INTO job_lock (lock_name) VALUES ('scheduler_lock');
+INSERT INTO job_lock (lock_name, owner, expires_at) VALUES ('scheduler_lock', NULL, 0);
+INSERT INTO job_control_state (id, paused, paused_at) VALUES (1, 0, -1);

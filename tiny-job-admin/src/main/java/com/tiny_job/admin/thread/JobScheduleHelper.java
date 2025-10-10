@@ -1,5 +1,6 @@
 package com.tiny_job.admin.thread;
 
+import com.tiny_job.admin.control.ClusterLockService;
 import com.tiny_job.admin.dao.JobInfoHelper;
 import com.tiny_job.admin.dao.entity.JobInfo;
 import com.tiny_job.admin.utils.CronExpression;
@@ -36,6 +37,11 @@ public class JobScheduleHelper {
 
     @Autowired
     private ExecutionControlService executionControlService;
+    @Autowired
+    private ClusterLockService clusterLockService;
+
+    private static final String SCHEDULER_LOCK = "scheduler_lock";
+    private static final long LOCK_LEASE_MILLIS = 10_000L;
 
     public void start() {
         scheduleThread = new Thread(() -> {
@@ -47,8 +53,14 @@ public class JobScheduleHelper {
                 catch (InterruptedException e) {
                     logger.error(e.getMessage(), e);
                 }
-                Long nowTime = System.currentTimeMillis();
+                boolean locked = false;
                 try {
+                    locked = clusterLockService.tryLock(SCHEDULER_LOCK, LOCK_LEASE_MILLIS);
+                    if (!locked) {
+                        logger.debug("scheduler lock busy, skip this loop");
+                        continue;
+                    }
+                    Long nowTime = System.currentTimeMillis();
                     if (executionControlService.isPaused()) {
                         logger.debug("scheduler paused, skip scheduling loop");
                         continue;
@@ -85,6 +97,10 @@ public class JobScheduleHelper {
                 }
                 catch (Exception e) {
                     logger.error("scheduler job error", e);
+                } finally {
+                    if (locked) {
+                        clusterLockService.unlock(SCHEDULER_LOCK);
+                    }
                 }
             }
 
