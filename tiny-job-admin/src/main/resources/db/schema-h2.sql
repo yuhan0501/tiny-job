@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS job_lock;
 CREATE TABLE job_config (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     execute_service VARCHAR(256) NOT NULL,
+    execute_path VARCHAR(256),
     execute_method VARCHAR(128),
     execute_param VARCHAR(512),
     service_type VARCHAR(64)

@@ -6,12 +6,15 @@ import com.tiny_job.admin.controller.model.CommonResult;
 import com.tiny_job.admin.dao.JobInfoHelper;
 import com.tiny_job.admin.dao.entity.JobConfig;
 import com.tiny_job.admin.dao.entity.JobInfo;
+import com.tiny_job.admin.dao.entity.JobLog;
+import com.tiny_job.admin.dao.mapper.JobLogMapper;
 import com.tiny_job.admin.utils.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +39,8 @@ public class JobInfoController {
     private static Logger logger = LoggerFactory.getLogger(JobInfoController.class);
     @Resource
     private JobInfoHelper jobInfoHelper;
+    @Resource
+    private JobLogMapper jobLogMapper;
 
     @Autowired
     private HttpServletRequest request;
@@ -62,6 +67,22 @@ public class JobInfoController {
         CommonResult<List<JobInfo>> commonResult = new CommonResult<>();
         commonResult.setMsg("success");
         return commonResult;
+    }
+
+    @GetMapping("/logs")
+    @ResponseBody
+    public CommonResult<List<JobLog>> logs(@RequestParam Long jobId,
+                                           @RequestParam(required = false, defaultValue = "1") int currentPage,
+                                           @RequestParam(required = false, defaultValue = "10") int pageSize) {
+        CommonResult<List<JobLog>> result = new CommonResult<>();
+        Page<JobLog> page = PageHelper.startPage(currentPage, pageSize);
+        List<JobLog> logs = jobLogMapper.selectByJobId(jobId);
+        result.setData(logs);
+        result.setCurrentPage(page.getPageNum());
+        result.setPageSize(page.getPageSize());
+        result.setTotalRecord(page.getTotal());
+        result.setMsg("success");
+        return result;
     }
 
     @PostMapping("/update")

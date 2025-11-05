@@ -13,30 +13,24 @@
 // 定义siderbar菜单
 const sidebarMenu = [
   {
-    key: 'job',
-    name: '定时任务',
+    key: 'job-manage',
+    name: '任务管理',
     icon: 'clock-circle',
-    child: [
-      {
-        key: 'job-manage',
-        name: '任务管理',
-      },
-    ],
   },
   {
-    key: 'operations',
-    name: '运维中心',
-    icon: 'tool',
-    child: [
-      {
-        key: 'pause-control',
-        name: '任务总控',
-      },
-      {
-        key: 'job-dashboard',
-        name: '调度监控',
-      },
-    ],
+    key: 'pause-control',
+    name: '任务总控',
+    icon: 'switcher',
+  },
+  {
+    key: 'job-dashboard',
+    name: '调度监控',
+    icon: 'dashboard',
+  },
+  {
+    key: 'job-log',
+    name: '任务日志',
+    icon: 'profile',
   },
 ];
 

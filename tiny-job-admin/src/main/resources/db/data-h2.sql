@@ -1,5 +1,5 @@
-INSERT INTO job_config (execute_service, execute_method, execute_param, service_type)
-VALUES ('http://localhost:9000/jobs/trigger', 'POST', 'jobId=1', 'http');
+INSERT INTO job_config (execute_service, execute_path, execute_method, execute_param, service_type)
+VALUES ('http://localhost:9000/jobs/trigger', NULL, 'POST', 'jobId=1', 'http');
 
 INSERT INTO job_info (job_cron, job_desc, author, job_type, config_id, execute_block_strategy,
                       execute_timeout, execute_fail_retry_count, child_job_id, job_status,

@@ -212,6 +212,32 @@ class MockAjax {
     });
   }
 
+  getJobLogs(jobId, currentPage = 1, pageSize = 10) {
+    return mockPromise(resolve => {
+      const data = [];
+      for (let i = 0; i < pageSize; i++) {
+        const triggerTime = new Date(Date.now() - i * 3 * 60 * 1000).format('yyyy-MM-dd HH:mm:ss');
+        const handleTime = new Date(Date.now() - (i * 3 - 1) * 60 * 1000).format('yyyy-MM-dd HH:mm:ss');
+        data.push({
+          id: (currentPage - 1) * pageSize + i + 1,
+          jobId,
+          handleCode: i % 4 === 0 ? '500' : '200',
+          handleMsg: i % 4 === 0 ? 'mock error' : 'mock success',
+          triggerTime,
+          handleTime,
+        });
+      }
+      resolve({
+        success: true,
+        code: 0,
+        data,
+        currentPage,
+        pageSize,
+        totalRecord: 100,
+      });
+    });
+  }
+
   CRUD(tableName) {
     if (this.tableCache.has(tableName)) {
       return this.tableCache.get(tableName);

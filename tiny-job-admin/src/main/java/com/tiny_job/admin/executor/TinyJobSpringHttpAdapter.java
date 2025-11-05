@@ -70,7 +70,8 @@ public class TinyJobSpringHttpAdapter implements TinyJobExecutorBaseAdapter {
         }
         catch (IOException e) {
             logger.error("call service error:{}", e);
-            logHelper.saveLog(jobInfo, "500", e.getMessage());
+            String errorMessage = e.getMessage() == null ? "调用执行服务失败" : e.getMessage();
+            logHelper.saveLog(jobInfo, errorMessage, "500");
         }
     }
 

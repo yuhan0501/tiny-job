@@ -20,4 +20,7 @@ public interface JobLogMapper extends tk.mybatis.mapper.common.Mapper<JobLog>,
 
     @Select("select * from job_log where trigger_time >= #{since}")
     List<JobLog> selectSince(@Param("since") Timestamp since);
+
+    @Select("select * from job_log where job_id = #{jobId} order by trigger_time desc")
+    List<JobLog> selectByJobId(@Param("jobId") Long jobId);
 }

@@ -17,6 +17,7 @@ public class JobConfig {
     @GeneratedValue(generator = "JDBC")
     private Long id;
     private String executeService;
+    private String executePath;
     private String executeMethod;
     private String executeParam;
     private String serviceType;
@@ -45,6 +46,14 @@ public class JobConfig {
         this.executeMethod = executeMethod;
     }
 
+    public String getExecutePath() {
+        return executePath;
+    }
+
+    public void setExecutePath(String executePath) {
+        this.executePath = executePath;
+    }
+
     public String getExecuteParam() {
         return executeParam;
     }
@@ -66,7 +75,8 @@ public class JobConfig {
         return "JobConfig{" +
                 "id=" + id +
                 ", executeService='" + executeService + '\'' +
-                ", executePath='" + executeMethod + '\'' +
+                ", executePath='" + executePath + '\'' +
+                ", executeMethod='" + executeMethod + '\'' +
                 ", executeParam='" + executeParam + '\'' +
                 ", service_type='" + serviceType + '\'' +
                 '}';

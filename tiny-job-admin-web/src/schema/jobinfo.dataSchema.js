@@ -1,5 +1,6 @@
 import React from 'react';
 import { Switch } from 'antd';
+import JobLogViewer from '../components/JobLogViewer';
 module.exports = [
   {
     key: 'id',
@@ -72,6 +73,7 @@ module.exports = [
     showType: 'select',
     options: [
       { key: 'http', value: 'HTTP 接口' },
+      { key: 'spring_cloud', value: 'Spring Cloud 服务' },
     ],
     defaultValue: 'http',
     validator: [{ required: true, message: '请选择任务类型' }],
@@ -81,8 +83,15 @@ module.exports = [
     title: '执行服务地址',
     dataType: 'varchar',
     showInTable: false,
-    placeholder: 'http://service/path/to/resource',
+    placeholder: 'http://service/path 或 Spring Cloud 服务名',
     validator: [{ required: true, message: '请填写执行服务地址' }],
+  },
+  {
+    key: 'jobConfig.executePath',
+    title: '执行路径',
+    dataType: 'varchar',
+    showInTable: false,
+    placeholder: '/api/demo (Spring Cloud 必填)',
   },
   {
     key: 'jobConfig.executeMethod',
@@ -106,7 +115,7 @@ module.exports = [
     dataType: 'varchar',
     showInTable: false,
     showType: 'textarea',
-    placeholder: 'a=b&c=d',
+    placeholder: 'a=b&c=d 或 JSON 请求体',
   },
   {
     key: 'executeBlockStrategy',
@@ -206,6 +215,11 @@ module.exports = [
     title: '操作',
     width: 160,
     actions: [
+      {
+        name: '执行记录',
+        type: 'component',
+        component: JobLogViewer,
+      },
       {
         name: '修改',
         type: 'update',

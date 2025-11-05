@@ -110,6 +110,19 @@ class Ajax {
     });
   }
 
+  getJobLogs(jobId, currentPage = 1, pageSize = 10) {
+    const params = {
+      jobId,
+      currentPage,
+      pageSize,
+    };
+    return this.get(`${globalConfig.getAPIPath()}/jobinfo/logs`, { params })
+      .then(resp => ({
+        ...resp,
+        success: resp.code === 0,
+      }));
+  }
+
   /**
    *  封装CRUD相关操作
    *
